@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Cole Pringle" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico">
+    <title>Population Statistics for Countries from 1990-2017</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../post/">BLOG</a></li>
+        
+        <li><a href="../projects/">PROJECTS</a></li>
+        
+        <li><a href="../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../project1/">Population Statistics for Countries from 1990-2017</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="../rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="../rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="../rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="../rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="../rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="../rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="../rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<pre class="r"><code>fert_dat &lt;- read.csv(&quot;/stor/home/cdp2653/children_per_woman_total_fertility.csv&quot;)
+CO2_dat &lt;- read.csv(&quot;/stor/home/cdp2653/consumption_emissions_tonnes_per_person.csv&quot;)
+GDP_dat &lt;- read.csv(&quot;/stor/home/cdp2653/gdppercapita_us_inflation_adjusted.csv&quot;)
+life_dat &lt;- read.csv(&quot;/stor/home/cdp2653/life_expectancy_years.csv&quot;)</code></pre>
+<div id="tidying-data" class="section level2">
+<h2>Tidying Data</h2>
+<pre class="r"><code>library(tidyr)
+library(tidyverse)
+library(dplyr)
+
+tidied_fertility &lt;- fert_dat %&gt;% pivot_longer(2:302, names_to = &quot;year&quot;, 
+    values_to = &quot;fertility&quot;)
+tidied_gdp &lt;- GDP_dat %&gt;% pivot_longer(2:61, names_to = &quot;year&quot;, 
+    values_to = &quot;GDP_Per_Capita&quot;)
+tidied_Co2 &lt;- CO2_dat %&gt;% pivot_longer(2:29, names_to = &quot;year&quot;, 
+    values_to = &quot;CO2_emission&quot;)
+tidied_life &lt;- life_dat %&gt;% pivot_longer(2:302, names_to = &quot;year&quot;, 
+    values_to = &quot;life_expectancy&quot;)</code></pre>
+<p>After uploading and importing datasets that focus on various statistics for countries across the world, these datasets were then “tidied”. This was accomplished by using the pivot_longer function. The datasets originally displayed data for evry year as unique columns. This caused the datasets to be long and unwieldy. By using pivot_longer, year was made into its own variable and column to make the datasets more manageable.</p>
+</div>
+<div id="joiningmerging-data" class="section level2">
+<h2>Joining/Merging Data</h2>
+<pre class="r"><code>gdp_life &lt;- tidied_life %&gt;% full_join(tidied_gdp) %&gt;% na.omit()
+Co2_gdp_life &lt;- gdp_life %&gt;% full_join(tidied_Co2) %&gt;% na.omit()
+full_tidied &lt;- Co2_gdp_life %&gt;% full_join(tidied_fertility) %&gt;% 
+    na.omit()
+full_tidied &lt;- full_tidied %&gt;% separate(year, into = c(NA, &quot;year&quot;), 
+    sep = 1, convert = TRUE)</code></pre>
+<p>Through using the full_join function, I was able to condense the 4 datsets into a single dataset that displayed the variables from every dataset. Full_join was specifically used because the datasets varied in the exact data they displayed. For example, one set might have data from 1800 to 2017, whereas another might have only the years 1990 to 2017. By using full_join, the rows of data that weren’t included in all four datasets were removed so that the final joined dataset would be more manageable. Additionally, na.omit was used because certain datasets were missing data for certain rows or columns. By removing these NA values, the dataset is more concise and easily examined.
+By joining in this manner, data from several datasets were dropped. The life expectancy and fertility datasets began in the year 1800 but after the join, all years up to 1990 were dropped. Additionally, many countries were dropped from several datasets because the CO2 emissions dataset included only 117 countries whereas others had closer to 180. These extra countries were dropped so that the CO2 dataset could be more effectively compared with the others. The cost of cutting out all this data is that the information that can be gained from examining the joined dataset is more limited than if all data had been preserved.</p>
+</div>
+<div id="wrangling-data" class="section level2">
+<h2>Wrangling Data</h2>
+<pre class="r"><code>full_tidied %&gt;% filter(year &lt; 2000) %&gt;% select(country, life_expectancy) %&gt;% 
+    arrange(desc(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 1,131 x 2
+##    country     life_expectancy
+##    &lt;fct&gt;                 &lt;dbl&gt;
+##  1 Japan                  81  
+##  2 Japan                  80.8
+##  3 Japan                  80.8
+##  4 Japan                  80.5
+##  5 Japan                  80.1
+##  6 Switzerland            80.1
+##  7 Japan                  80  
+##  8 Switzerland            79.8
+##  9 Japan                  79.7
+## 10 Sweden                 79.6
+## # … with 1,121 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% filter(year &lt; 2000) %&gt;% select(country, life_expectancy) %&gt;% 
+    arrange(life_expectancy)</code></pre>
+<pre><code>## # A tibble: 1,131 x 2
+##    country life_expectancy
+##    &lt;fct&gt;             &lt;dbl&gt;
+##  1 Rwanda             9.64
+##  2 Malawi            44.3 
+##  3 Malawi            44.4 
+##  4 Malawi            44.7 
+##  5 Malawi            45.1 
+##  6 Zambia            45.5 
+##  7 Zambia            45.5 
+##  8 Malawi            45.6 
+##  9 Zambia            45.6 
+## 10 Zambia            45.7 
+## # … with 1,121 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% filter(year &gt;= 2000) %&gt;% select(country, life_expectancy) %&gt;% 
+    arrange(desc(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 2,103 x 2
+##    country     life_expectancy
+##    &lt;fct&gt;                 &lt;dbl&gt;
+##  1 Singapore              84.8
+##  2 Singapore              84.7
+##  3 Singapore              84.4
+##  4 Japan                  84.2
+##  5 Japan                  84.2
+##  6 Singapore              84.2
+##  7 Japan                  84.1
+##  8 Switzerland            84  
+##  9 Singapore              83.9
+## 10 Japan                  83.8
+## # … with 2,093 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% filter(year &gt;= 2000) %&gt;% select(country, life_expectancy) %&gt;% 
+    arrange(life_expectancy)</code></pre>
+<pre><code>## # A tibble: 2,103 x 2
+##    country  life_expectancy
+##    &lt;fct&gt;              &lt;dbl&gt;
+##  1 Malawi              44.6
+##  2 Malawi              44.9
+##  3 Zimbabwe            45.1
+##  4 Zimbabwe            45.1
+##  5 Malawi              45.3
+##  6 Zimbabwe            45.4
+##  7 Zimbabwe            45.4
+##  8 Zimbabwe            45.6
+##  9 Zimbabwe            45.9
+## 10 Malawi              46  
+## # … with 2,093 more rows</code></pre>
+<pre class="r"><code>full_tidied &lt;- full_tidied %&gt;% mutate(lifetime_CO2_consumption = life_expectancy * 
+    CO2_emission)
+full_tidied %&gt;% select(country, lifetime_CO2_consumption) %&gt;% 
+    arrange(lifetime_CO2_consumption)</code></pre>
+<pre><code>## # A tibble: 3,234 x 2
+##    country  lifetime_CO2_consumption
+##    &lt;fct&gt;                       &lt;dbl&gt;
+##  1 Namibia                     0    
+##  2 Rwanda                      0.749
+##  3 Ethiopia                    2.85 
+##  4 Ethiopia                    3.11 
+##  5 Rwanda                      3.20 
+##  6 Rwanda                      3.22 
+##  7 Rwanda                      3.23 
+##  8 Rwanda                      3.25 
+##  9 Rwanda                      3.28 
+## 10 Rwanda                      3.28 
+## # … with 3,224 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% select(country, lifetime_CO2_consumption) %&gt;% 
+    arrange(desc(lifetime_CO2_consumption))</code></pre>
+<pre><code>## # A tibble: 3,234 x 2
+##    country    lifetime_CO2_consumption
+##    &lt;fct&gt;                         &lt;dbl&gt;
+##  1 Luxembourg                    4091.
+##  2 Luxembourg                    3993.
+##  3 Luxembourg                    3870.
+##  4 Luxembourg                    3609.
+##  5 Luxembourg                    3504.
+##  6 Luxembourg                    3362.
+##  7 Luxembourg                    3329.
+##  8 Luxembourg                    3252.
+##  9 Luxembourg                    3248.
+## 10 Luxembourg                    2821.
+## # … with 3,224 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(mean(fertility))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean(fertility)`
+##               &lt;dbl&gt;
+## 1              2.83</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(sd(fertility))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `sd(fertility)`
+##             &lt;dbl&gt;
+## 1            1.50</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(var(fertility))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `var(fertility)`
+##              &lt;dbl&gt;
+## 1             2.26</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(min(fertility))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `min(fertility)`
+##              &lt;dbl&gt;
+## 1             1.12</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(max(fertility))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `max(fertility)`
+##              &lt;dbl&gt;
+## 1             7.25</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(quantile(fertility))</code></pre>
+<pre><code>## # A tibble: 5 x 1
+##   `quantile(fertility)`
+##                   &lt;dbl&gt;
+## 1                  1.12
+## 2                  1.67
+## 3                  2.3 
+## 4                  3.58
+## 5                  7.25</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(mean(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean(GDP_Per_Capita)`
+##                    &lt;dbl&gt;
+## 1                 14890.</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(sd(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `sd(GDP_Per_Capita)`
+##                  &lt;dbl&gt;
+## 1               19268.</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(var(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `var(GDP_Per_Capita)`
+##                   &lt;dbl&gt;
+## 1            371242107.</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(min(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `min(GDP_Per_Capita)`
+##                   &lt;int&gt;
+## 1                   164</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(max(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `max(GDP_Per_Capita)`
+##                   &lt;int&gt;
+## 1                112000</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(quantile(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 5 x 1
+##   `quantile(GDP_Per_Capita)`
+##                        &lt;dbl&gt;
+## 1                        164
+## 2                       1570
+## 3                       5785
+## 4                      21875
+## 5                     112000</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(mean(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean(CO2_emission)`
+##                  &lt;dbl&gt;
+## 1                 6.20</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(sd(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `sd(CO2_emission)`
+##                &lt;dbl&gt;
+## 1               6.80</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(var(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `var(CO2_emission)`
+##                 &lt;dbl&gt;
+## 1                46.2</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(min(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `min(CO2_emission)`
+##                 &lt;dbl&gt;
+## 1                   0</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(max(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `max(CO2_emission)`
+##                 &lt;dbl&gt;
+## 1                50.7</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(quantile(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 5 x 1
+##   `quantile(CO2_emission)`
+##                      &lt;dbl&gt;
+## 1                     0   
+## 2                     1.03
+## 3                     3.9 
+## 4                     9.44
+## 5                    50.7</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(mean(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean(life_expectancy)`
+##                     &lt;dbl&gt;
+## 1                    70.9</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(sd(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `sd(life_expectancy)`
+##                   &lt;dbl&gt;
+## 1                  8.68</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(var(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `var(life_expectancy)`
+##                    &lt;dbl&gt;
+## 1                   75.4</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(min(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `min(life_expectancy)`
+##                    &lt;dbl&gt;
+## 1                   9.64</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(max(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `max(life_expectancy)`
+##                    &lt;dbl&gt;
+## 1                   84.8</code></pre>
+<pre class="r"><code>full_tidied %&gt;% summarize(quantile(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 5 x 1
+##   `quantile(life_expectancy)`
+##                         &lt;dbl&gt;
+## 1                        9.64
+## 2                       66.6 
+## 3                       73.1 
+## 4                       77.3 
+## 5                       84.8</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(mean(fertility))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `mean(fertility)`
+##    &lt;fct&gt;                  &lt;dbl&gt;
+##  1 Albania                 2.08
+##  2 Argentina               2.54
+##  3 Armenia                 1.67
+##  4 Australia               1.85
+##  5 Austria                 1.43
+##  6 Azerbaijan              2.20
+##  7 Bahrain                 2.62
+##  8 Bangladesh              2.95
+##  9 Belarus                 1.50
+## 10 Belgium                 1.71
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(mean(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `mean(GDP_Per_Capita)`
+##    &lt;fct&gt;                       &lt;dbl&gt;
+##  1 Albania                     2937.
+##  2 Argentina                   8820.
+##  3 Armenia                     2374.
+##  4 Australia                  46343.
+##  5 Austria                    42746.
+##  6 Azerbaijan                  3500 
+##  7 Bahrain                    21639.
+##  8 Bangladesh                   653.
+##  9 Belarus                     4192.
+## 10 Belgium                    40329.
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(mean(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `mean(CO2_emission)`
+##    &lt;fct&gt;                     &lt;dbl&gt;
+##  1 Albania                   1.56 
+##  2 Argentina                 3.85 
+##  3 Armenia                   1.78 
+##  4 Australia                15.4  
+##  5 Austria                  11.4  
+##  6 Azerbaijan                3.86 
+##  7 Bahrain                  16.9  
+##  8 Bangladesh                0.360
+##  9 Belarus                   5.84 
+## 10 Belgium                  17.2  
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(mean(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `mean(life_expectancy)`
+##    &lt;fct&gt;                        &lt;dbl&gt;
+##  1 Albania                       75.8
+##  2 Argentina                     74.6
+##  3 Armenia                       72.6
+##  4 Australia                     80.3
+##  5 Austria                       79.0
+##  6 Azerbaijan                    67.6
+##  7 Bahrain                       74.8
+##  8 Bangladesh                    66.5
+##  9 Belarus                       70.1
+## 10 Belgium                       78.7
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(sd(fertility))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `sd(fertility)`
+##    &lt;fct&gt;                &lt;dbl&gt;
+##  1 Albania             0.456 
+##  2 Argentina           0.215 
+##  3 Armenia             0.379 
+##  4 Australia           0.0566
+##  5 Austria             0.0525
+##  6 Azerbaijan          0.389 
+##  7 Bahrain             0.522 
+##  8 Bangladesh          0.769 
+##  9 Belarus             0.196 
+## 10 Belgium             0.0899
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(sd(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `sd(GDP_Per_Capita)`
+##    &lt;fct&gt;                     &lt;dbl&gt;
+##  1 Albania                   1194.
+##  2 Argentina                 1414.
+##  3 Armenia                   1141.
+##  4 Australia                 7102.
+##  5 Austria                   5181.
+##  6 Azerbaijan                1915.
+##  7 Bahrain                   1105.
+##  8 Bangladesh                 213.
+##  9 Belarus                   1693.
+## 10 Belgium                   4643.
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(sd(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `sd(CO2_emission)`
+##    &lt;fct&gt;                   &lt;dbl&gt;
+##  1 Albania                 0.516
+##  2 Argentina               0.574
+##  3 Armenia                 0.765
+##  4 Australia               1.36 
+##  5 Austria                 0.716
+##  6 Azerbaijan              0.433
+##  7 Bahrain                 4.46 
+##  8 Bangladesh              0.152
+##  9 Belarus                 1.68 
+## 10 Belgium                 1.83 
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(sd(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `sd(life_expectancy)`
+##    &lt;fct&gt;                      &lt;dbl&gt;
+##  1 Albania                     1.78
+##  2 Argentina                   1.36
+##  3 Armenia                     2.16
+##  4 Australia                   1.91
+##  5 Austria                     1.96
+##  6 Azerbaijan                  2.06
+##  7 Bahrain                     3.39
+##  8 Bangladesh                  4.49
+##  9 Belarus                     1.93
+## 10 Belgium                     1.67
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(var(fertility))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `var(fertility)`
+##    &lt;fct&gt;                 &lt;dbl&gt;
+##  1 Albania             0.208  
+##  2 Argentina           0.0464 
+##  3 Armenia             0.144  
+##  4 Australia           0.00320
+##  5 Austria             0.00275
+##  6 Azerbaijan          0.151  
+##  7 Bahrain             0.273  
+##  8 Bangladesh          0.592  
+##  9 Belarus             0.0384 
+## 10 Belgium             0.00808
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(var(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `var(GDP_Per_Capita)`
+##    &lt;fct&gt;                      &lt;dbl&gt;
+##  1 Albania                 1426474.
+##  2 Argentina               1998663.
+##  3 Armenia                 1302014.
+##  4 Australia              50440317.
+##  5 Austria                26841839.
+##  6 Azerbaijan              3666756.
+##  7 Bahrain                 1221733.
+##  8 Bangladesh                45290.
+##  9 Belarus                 2865627.
+## 10 Belgium                21558413.
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(var(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `var(CO2_emission)`
+##    &lt;fct&gt;                    &lt;dbl&gt;
+##  1 Albania                 0.266 
+##  2 Argentina               0.330 
+##  3 Armenia                 0.586 
+##  4 Australia               1.84  
+##  5 Austria                 0.513 
+##  6 Azerbaijan              0.188 
+##  7 Bahrain                19.9   
+##  8 Bangladesh              0.0231
+##  9 Belarus                 2.82  
+## 10 Belgium                 3.33  
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(var(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `var(life_expectancy)`
+##    &lt;fct&gt;                       &lt;dbl&gt;
+##  1 Albania                      3.17
+##  2 Argentina                    1.86
+##  3 Armenia                      4.66
+##  4 Australia                    3.63
+##  5 Austria                      3.85
+##  6 Azerbaijan                   4.26
+##  7 Bahrain                     11.5 
+##  8 Bangladesh                  20.1 
+##  9 Belarus                      3.73
+## 10 Belgium                      2.80
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(min(fertility))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `min(fertility)`
+##    &lt;fct&gt;                 &lt;dbl&gt;
+##  1 Albania                1.65
+##  2 Argentina              2.28
+##  3 Armenia                1.2 
+##  4 Australia              1.76
+##  5 Austria                1.33
+##  6 Azerbaijan             1.82
+##  7 Bahrain                2.01
+##  8 Bangladesh             2.08
+##  9 Belarus                1.24
+## 10 Belgium                1.58
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(min(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `min(GDP_Per_Capita)`
+##    &lt;fct&gt;                      &lt;int&gt;
+##  1 Albania                     1240
+##  2 Argentina                   6250
+##  3 Armenia                      885
+##  4 Australia                  35000
+##  5 Austria                    33900
+##  6 Azerbaijan                  1230
+##  7 Bahrain                    17900
+##  8 Bangladesh                   411
+##  9 Belarus                     2020
+## 10 Belgium                    32700
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(min(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `min(CO2_emission)`
+##    &lt;fct&gt;                    &lt;dbl&gt;
+##  1 Albania                  0.707
+##  2 Argentina                2.55 
+##  3 Armenia                  0.59 
+##  4 Australia               13.5  
+##  5 Austria                 10.4  
+##  6 Azerbaijan               2.98 
+##  7 Bahrain                 10.3  
+##  8 Bangladesh               0.169
+##  9 Belarus                  2.61 
+## 10 Belgium                 14.7  
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(min(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `min(life_expectancy)`
+##    &lt;fct&gt;                       &lt;dbl&gt;
+##  1 Albania                      72.5
+##  2 Argentina                    72.4
+##  3 Armenia                      68.6
+##  4 Australia                    76.9
+##  5 Austria                      75.8
+##  6 Azerbaijan                   63.5
+##  7 Bahrain                      70.4
+##  8 Bangladesh                   56.8
+##  9 Belarus                      67.8
+## 10 Belgium                      76  
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(max(fertility))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `max(fertility)`
+##    &lt;fct&gt;                 &lt;dbl&gt;
+##  1 Albania                2.98
+##  2 Argentina              2.99
+##  3 Armenia                2.54
+##  4 Australia              1.94
+##  5 Austria                1.51
+##  6 Azerbaijan             3.09
+##  7 Bahrain                3.74
+##  8 Bangladesh             4.55
+##  9 Belarus                1.9 
+## 10 Belgium                1.81
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(max(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `max(GDP_Per_Capita)`
+##    &lt;fct&gt;                      &lt;int&gt;
+##  1 Albania                     4860
+##  2 Argentina                  10900
+##  3 Armenia                     4200
+##  4 Australia                  56100
+##  5 Austria                    49100
+##  6 Azerbaijan                  6070
+##  7 Bahrain                    23000
+##  8 Bangladesh                  1130
+##  9 Belarus                     6650
+## 10 Belgium                    46600
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(max(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `max(CO2_emission)`
+##    &lt;fct&gt;                    &lt;dbl&gt;
+##  1 Albania                  2.17 
+##  2 Argentina                4.7  
+##  3 Armenia                  3.87 
+##  4 Australia               17.5  
+##  5 Austria                 12.8  
+##  6 Azerbaijan               4.76 
+##  7 Bahrain                 24.2  
+##  8 Bangladesh               0.644
+##  9 Belarus                  8.21 
+## 10 Belgium                 20.8  
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(max(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 117 x 2
+##    country    `max(life_expectancy)`
+##    &lt;fct&gt;                       &lt;dbl&gt;
+##  1 Albania                      78.2
+##  2 Argentina                    76.7
+##  3 Armenia                      75.6
+##  4 Australia                    82.6
+##  5 Austria                      81.8
+##  6 Azerbaijan                   70.8
+##  7 Bahrain                      79.5
+##  8 Bangladesh                   73.1
+##  9 Belarus                      74  
+## 10 Belgium                      81.4
+## # … with 107 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(quantile(fertility))</code></pre>
+<pre><code>## # A tibble: 585 x 2
+## # Groups:   country [117]
+##    country   `quantile(fertility)`
+##    &lt;fct&gt;                     &lt;dbl&gt;
+##  1 Albania                    1.65
+##  2 Albania                    1.7 
+##  3 Albania                    1.86
+##  4 Albania                    2.44
+##  5 Albania                    2.98
+##  6 Argentina                  2.28
+##  7 Argentina                  2.37
+##  8 Argentina                  2.49
+##  9 Argentina                  2.67
+## 10 Argentina                  2.99
+## # … with 575 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(quantile(GDP_Per_Capita))</code></pre>
+<pre><code>## # A tibble: 585 x 2
+## # Groups:   country [117]
+##    country   `quantile(GDP_Per_Capita)`
+##    &lt;fct&gt;                          &lt;dbl&gt;
+##  1 Albania                        1240 
+##  2 Albania                        1840 
+##  3 Albania                        2810 
+##  4 Albania                        4120 
+##  5 Albania                        4860 
+##  6 Argentina                      6250 
+##  7 Argentina                      7752.
+##  8 Argentina                      8560 
+##  9 Argentina                     10250 
+## 10 Argentina                     10900 
+## # … with 575 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(quantile(CO2_emission))</code></pre>
+<pre><code>## # A tibble: 585 x 2
+## # Groups:   country [117]
+##    country   `quantile(CO2_emission)`
+##    &lt;fct&gt;                        &lt;dbl&gt;
+##  1 Albania                      0.707
+##  2 Albania                      1.12 
+##  3 Albania                      1.75 
+##  4 Albania                      1.98 
+##  5 Albania                      2.17 
+##  6 Argentina                    2.55 
+##  7 Argentina                    3.48 
+##  8 Argentina                    3.77 
+##  9 Argentina                    4.42 
+## 10 Argentina                    4.7  
+## # … with 575 more rows</code></pre>
+<pre class="r"><code>full_tidied %&gt;% group_by(country) %&gt;% summarize(quantile(life_expectancy))</code></pre>
+<pre><code>## # A tibble: 585 x 2
+## # Groups:   country [117]
+##    country   `quantile(life_expectancy)`
+##    &lt;fct&gt;                           &lt;dbl&gt;
+##  1 Albania                          72.5
+##  2 Albania                          74.5
+##  3 Albania                          75.5
+##  4 Albania                          77.6
+##  5 Albania                          78.2
+##  6 Argentina                        72.4
+##  7 Argentina                        73.4
+##  8 Argentina                        74.6
+##  9 Argentina                        75.8
+## 10 Argentina                        76.7
+## # … with 575 more rows</code></pre>
+<p>I started by looking at how certain facets of the data varied from years before 2000 to after 2000. I then also made a new variable, lifetime CO2 consumption, that is a measure of how much CO2 emission the average person in each country is responsible for over the course of their lifetime. This value was obtained by multiplying the life expectancy by CO2 emission value. Then 6 values, mean, standard deviation, variance, quantiles, maximum, and minimum were determined for all the variables. These same variables were then used when grouping by the country so that the values of the variables could be better understood on a country by country basis.
+One important thing to note from the data was an outlier in the life_expectancy values. In 1994, Rwanda had a life expectancy of approximately 9.64 years whereas the second and third lowest values were 44.3 and 44.4 years respectively. This outlier seemed likely to be some sort of mistake as a life expectancy of 9.64 is incredibly low. This value was later removed. On the other end of this variable, the highest life expectancies occurred in Singapore and Japan and sat at around 84 years of age. Average life expectancy was 70.9 years, average CO2 emission was 6.20 metric tons per person, average GDP per capita was 14,890 USD, and the average fertility was 2.83 children per woman.</p>
+</div>
+<div id="visualization" class="section level2">
+<h2>Visualization</h2>
+<pre class="r"><code>full_tidied %&gt;% select_if(is.numeric) %&gt;% cor %&gt;% as.data.frame %&gt;% 
+    rownames_to_column %&gt;% pivot_longer(-1) %&gt;% ggplot(aes(rowname, 
+    name, fill = value)) + geom_tile() + geom_text(aes(label = round(value, 
+    2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + coord_fixed() + scale_fill_gradient2(low = &quot;red&quot;, 
+    mid = &quot;white&quot;, high = &quot;blue&quot;) + ggtitle(&quot;Correlation Heatmap for Several Population Statistics&quot;)</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This correlation matrix displays how the various variables correlate with each other. The one notable outlying variable from this heatmap is fertility. It has a negative correlation with all other variables whereas all other variables are positively correlated with each other. This makes sense goven that high fertility is often a sign of lesser developed countries and as countries develop their fertility tends to decrease. Every variable other than fertility is associated with advancement or higher quality of living, such as life expectancy and GDP. The year is also positively correlated with all variables except fertility. This suggests that, on average, as time moves forward, countries have increases in CO2 emission, life expectancy, GDP per capita, and lifetime CO2 consumption.</p>
+<pre class="r"><code>all_first_10 &lt;- full_tidied %&gt;% slice(1:280)
+ggplot(all_first_10, aes(life_expectancy, GDP_Per_Capita)) + 
+    geom_point(aes(color = country, size = CO2_emission), stat = &quot;summary&quot;, 
+        fun = mean) + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) + 
+    ggtitle(&quot;Correlation Between GDP, Life Expectancy, and CO2 Emissions&quot;) + 
+    ylab(&quot;GDP Per Capita (USD)&quot;) + xlab(&quot;Life Expectancy (Years)&quot;)</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This plot displays statistics for 10 of the countries in the dataset. Life expectancy is displayed along the x-axis, GDP along the Y, CO2 emission is represented by the size of the dots, and the countries or noted by the color of the dots. This plot echoes what was seen in the correlation heatmap and shows that life expectancy, GDP per capita, and CO2 emissions are all positively correlated. The countries with the highest life expectancy and GDP per capita, shown in the top right corner, are Australia, Austria, and Canada. They also have larger than average CO2 emission values. The country most notably located low on life expectancy and GDP per capita is Bangladesh, and it also has noticeably low CO2 emission values.</p>
+<pre class="r"><code>all_first_20 &lt;- full_tidied %&gt;% slice(1:557)
+ggplot(all_first_20, aes(year, GDP_Per_Capita)) + geom_point(aes(color = country)) + 
+    ggtitle(&quot;GDP Per Capita Across 20 Countries From 1990-2017&quot;) + 
+    ylab(&quot;GDP Per Capita (USD)&quot;) + xlab(&quot;Year&quot;)</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This plot fluctuation in GDP per capita in 20 countries from 1990-2017. Interestingly, countries seem mostly clustered towards either the bottom or the top of the graph, with only a few countries occupying the middle space. Additionally, the countries near the top of the plot, those whose GDP per capita values are already high, seem to be increasing in GDP per capita while most other countries seem to be remaining somewhat stagnant. This seems to suggest that countries which are already well off tend to be the ones improving in GDP per capita whereas less developed countries have been continuing to struggle to improve.</p>
+<pre class="r"><code>ggplot(all_first_20, aes(x = country)) + geom_bar(aes(y = life_expectancy, 
+    fill = country), stat = &quot;summary&quot;, fun = mean) + theme(axis.text.x = element_text(angle = 45, 
+    hjust = 1), legend.position = &quot;none&quot;) + ggtitle(&quot;Average Life Expectancy Across 20 Countries&quot;) + 
+    ylab(&quot;Life Expectancy (Years)&quot;) + xlab(&quot;Country&quot;)</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This plot shows average life expectancy from 1990-2017 for 20 countries. 4 countries stand somewhat noticeably above the others, these being Australia, Austria, Belgium, and Canada. All of these countries are sitting at or just below 80 years as an average life expectancy. The 4 countries with the lowest average life expectancy are Benin, Botswana, Burkina Faso, and Cambodia, and all sit below 60 years.</p>
+<pre class="r"><code>library(cluster)
+full_tidied &lt;- full_tidied[-c(2460), ]
+cluster_data &lt;- full_tidied %&gt;% dplyr::select(life_expectancy, 
+    GDP_Per_Capita, CO2_emission, fertility)
+sil_width &lt;- vector()
+for (i in 2:10) {
+    kms &lt;- kmeans(cluster_data, centers = i)
+    sil &lt;- silhouette(kms$cluster, dist(cluster_data))
+    sil_width[i] &lt;- mean(sil[, 3])
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(cluster)
+pam1 &lt;- cluster_data %&gt;% pam(k = 3)
+
+pamclust &lt;- cluster_data %&gt;% mutate(cluster = as.factor(pam1$clustering))
+pamclust %&gt;% ggplot(aes(life_expectancy, GDP_Per_Capita, CO2_emission, 
+    fertility, color = cluster)) + geom_point() + ggtitle(&quot;Cluster Analysis of Relationships Between GDP Per Capita and Life Expectancy&quot;) + 
+    ylab(&quot;GDP Per Capita (USD)&quot;) + xlab(&quot;Life Expectancy (Years)&quot;)</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pamclust %&gt;% group_by(cluster) %&gt;% summarize_if(is.numeric, mean, 
+    na.rm = T)</code></pre>
+<pre><code>## # A tibble: 3 x 5
+##   cluster life_expectancy GDP_Per_Capita CO2_emission fertility
+##   &lt;fct&gt;             &lt;dbl&gt;          &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;
+## 1 1                  66.2          2727.         2.06      3.53
+## 2 2                  75.5         15586.         8.51      1.98
+## 3 3                  79.1         47292.        15.1       1.80</code></pre>
+<pre class="r"><code>full_tidied %&gt;% slice(pam1$id.med)</code></pre>
+<pre><code>## # A tibble: 3 x 7
+##   country  year life_expectancy GDP_Per_Capita CO2_emission fertility
+##   &lt;fct&gt;   &lt;int&gt;           &lt;dbl&gt;          &lt;int&gt;        &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Morocco  1996            68.2           1910         1.28      3.16
+## 2 Lithua…  2013            74            14300         7.3       1.6 
+## 3 Belgium  2005            79.2          42600        19.8       1.76
+## # … with 1 more variable: lifetime_CO2_consumption &lt;dbl&gt;</code></pre>
+<pre class="r"><code>pam1$silinfo$avg.width</code></pre>
+<pre><code>## [1] 0.6358546</code></pre>
+<pre class="r"><code>pam_dat &lt;- full_tidied %&gt;% select(GDP_Per_Capita, life_expectancy, 
+    CO2_emission, fertility)
+
+pam2 &lt;- full_tidied %&gt;% select(life_expectancy, GDP_Per_Capita, 
+    CO2_emission, fertility) %&gt;% scale %&gt;% pam(3)
+pam2</code></pre>
+<pre><code>## Medoids:
+##        ID life_expectancy GDP_Per_Capita CO2_emission  fertility
+## [1,]  830       0.2218372     -0.4273445   -0.5527879 -0.2523110
+## [2,] 3055       0.9412880      1.2510080    0.8672539 -0.7385373
+## [3,] 1187      -1.5071655     -0.7369107   -0.8766752  1.6193276
+## Clustering vector:
+##   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##  [75] 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 3133 entries ]
+## Objective function:
+##     build      swap 
+## 0.9250007 0.9138107 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code>clustering_stuff &lt;- full_tidied %&gt;% mutate(cluster = pam2$clustering)
+library(plotly)
+clustering_stuff %&gt;% plot_ly(x = ~life_expectancy, y = ~GDP_Per_Capita, 
+    z = ~fertility, color = ~cluster, type = &quot;scatter3d&quot;, mode = &quot;markers&quot;) %&gt;% 
+    layout(autosize = F, width = 900, height = 400)</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"visdat":{"64e97817c37d":["function () ","plotlyVisDat"]},"cur_data":"64e97817c37d","attrs":{"64e97817c37d":{"x":{},"y":{},"z":{},"mode":"markers","color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"width":900,"height":400,"margin":{"b":40,"l":60,"t":25,"r":10},"autosize":false,"scene":{"xaxis":{"title":"life_expectancy"},"yaxis":{"title":"GDP_Per_Capita"},"zaxis":{"title":"fertility"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[73.3,73,73.4,73.9,74.5,74.6,74.4,72.5,74.5,74.6,74.9,75.2,75.3,75.4,75.6,76,76.4,76.9,77,77.5,77.6,77.7,77.8,77.9,77.9,78,78.1,78.2,72.4,72.6,72.6,72.9,73.3,73.3,73.3,73.5,73.5,73.6,74.2,74.3,74.2,74.3,74.9,75.3,75.4,75.1,75.5,75.6,75.8,75.9,76,76.1,76.4,76.5,76.5,76.7,70.1,69.7,68.6,68.9,69.4,69.9,70.3,71,71.5,71.9,72.3,72.6,72.7,72.9,73.2,73.4,73.6,73.9,73.8,73.9,74,74.3,74.7,75.2,75.3,75.3,75.4,75.6,76.9,77.3,77.4,77.8,77.9,78.2,78.3,78.6,78.9,79.3,79.5,80,80.2,80.5,80.8,81.2,81.4,81.4,81.5,81.7,82,82.1,82.5,82.6,82.5,82.5,82.5,82.4,75.8,75.9,76.1,76.2,76.6,76.8,77.1,77.6,77.8,78,78.3,78.7,78.9,79,79.4,79.6,80.1,80.2,80.4,80.3,80.6,80.8,81,81.2,81.4,81.5,81.7,81.8,67.4,66.8,64.6,64.5,63.5,65,65.3,65.6,65.9,66.3,66.8,67.2,67.3,67.2,67.4,67.5,68,68.5,68.8,69.1,69.3,69.5,69.8,70.1,70.3,70.5,70.6,70.8,70.5,70.5,70.4,70.6,70.8,71,71.2,71.4,71.7,72.4,72.6,73.7,74.2,74.2,74.4,75.1,75.7,76.5,77.1,77.8,78.2,78.5,78.7,78.9,79.2,79.3,79.4,79.5,58.3,56.8,60.1,60.9,61.7,62.1,62.9,63.7,64.5,65.2,65.5,66.1,66.5,66.8,67.3,67.6,67.9,68.1,68.5,69.1,69.5,70.3,71.1,71.7,72,72.5,72.9,73.1,71.1,70.7,70.2,69.1,68.9,68.5,68.6,68.5,68.3,68,68.8,68.3,67.8,68.4,68.8,68.6,69.3,70.2,70.3,70.4,70.4,70.4,72.2,72.6,73.1,73.8,74,74,76,76.3,76.4,76.5,76.6,76.9,77.2,77.4,77.6,77.7,77.8,78.1,78.3,78.5,79,79.2,79.6,79.6,79.6,79.8,80.1,80.2,80.3,80.5,80.9,80.9,81.2,81.4,55.2,55.5,56,56.4,56.5,56.7,56.8,57,57.2,57.4,57.5,57.7,58.1,58.4,58.8,59.2,59.6,60,60.5,61,61.4,61.8,62.2,62.6,63,63.5,64.1,64.6,60.9,61.3,61.8,62.3,63,63.6,64.2,64.7,65.3,65.9,66.5,67.2,67.6,68.1,68.5,69,69.4,69.7,70.1,70.5,70.8,71.1,71.4,71.7,71.9,72.2,72.5,72.8,63.5,63,62.3,61.6,60.8,59.9,59,57.9,56.6,55.3,54,52.8,51.9,51.4,51.6,52.7,54.2,55.8,57,58.4,60.2,61.6,63.2,64.5,65.8,66.9,68.1,69.1,67.5,68.1,68.4,68.5,68.9,69.3,69.7,70.2,70.6,71,71.4,71.8,72.1,72.3,72.6,73.1,73.5,73.7,74,74.2,74.4,74.5,74.9,75.1,75.3,75.5,75.4,75.5,70.5,70.7,71.1,71.6,71.9,72.3,72.7,73.1,73.4,73.7,73.8,74,74.2,74.4,74.5,74.7,74.8,74.9,75,75,75.1,75,75,75,75.1,75.1,75.2,75.3,71.7,71.9,71.4,71.5,70.9,71,71,70.4,70.9,71.5,71.6,71.9,72.2,72.4,72.5,72.6,72.7,73,73.3,73.6,73.8,74.1,74.5,74.8,74.5,74.8,74.9,74.9,50.8,50.7,50.6,50.6,50.5,50.5,50.3,50.8,51.4,51.9,52.4,52.8,53.4,54,54.6,55.3,55.9,56.5,57.2,57.8,58.3,58.8,59.2,59.7,60.2,60.7,61.2,61.7,58.4,58.4,58.7,58.8,59.1,59.4,59.8,60.2,60.8,61.5,62.1,62.9,63.7,64.5,65.3,66,66.6,67.1,67.6,68.2,68.6,69,69.3,69.6,69.9,57.7,57.4,57.1,56.8,56.5,56.2,55.9,55.6,55.3,55.1,54.8,54.7,54.6,54.6,54.6,54.9,55.3,55.7,56.3,56.9,57.7,58.4,59.2,59.9,60.5,61.2,62.1,63,77.3,77.6,77.7,77.7,77.9,78,78.2,78.5,78.7,78.9,79.2,79.5,79.6,79.8,80.1,80.2,80.6,80.7,80.8,81.1,81.4,81.7,81.7,81.9,81.8,81.7,81.9,82,73.2,74.2,74.9,74.9,75,75.1,75.4,75.8,76,76.3,76.9,76.8,77.3,77.3,77.5,77.9,78.2,78.4,78.8,78.6,78.6,79,79.3,79.3,79.6,79.6,79.7,79.7,68.7,68.8,69.1,69.4,69.7,70,70.4,70.8,71.3,71.7,72.1,72.6,73,73.4,73.7,74.2,74.9,75.4,75.4,75.7,75.8,76,76.2,76.5,76.5,76.5,76.7,77.1,71.4,70.9,71,71.5,71.7,72,72.3,73.2,73.7,73.9,74.1,74.3,73.3,75.1,75.6,76.4,76.6,77.3,77.6,77.7,78.1,78.9,79.3,79.6,80,80,80,80.1,76.5,76.5,76.6,76.7,76.4,76.3,76.8,77,77.2,77.3,77.9,78,78.3,78.4,78.5,79.3,79.2,80.2,80.2,80.3,79.4,79.8,80,80.1,80.1,79.9,79.5,79.5,54.8,54.2,53.5,52.8,52.2,51.7,51.6,51.7,51.8,52,52.3,52.7,52.9,53.3,53.7,54.2,54.9,55.5,56.3,57,57.4,58,58.9,59.6,60.2,61,61.7,62.5,73.1,73.5,73.4,73.8,74,74.5,74.8,74.9,74.9,75.5,75.5,75.8,75.7,75.8,76.4,76.8,77,77.3,77.8,77.8,77.6,78.3,78.5,75.9,76.1,76.3,76.5,76.7,76.8,76.8,76.6,76.5,76.7,76.8,77,77.2,77.4,77.6,77.9,78.4,78.8,79.3,79.7,80.1,80.5,80.9,81.1,81.3,81.5,81.7,81.7,71.5,72,72.3,72.9,73.1,73.3,73.9,74,74.6,74.8,75,75.3,75.5,75.5,76,76.3,76.8,77,77.2,77.5,77.7,77.9,78.1,78.4,78.8,78.8,79,79.2,75,75.3,75.4,75.4,75.3,75.5,75.8,76.2,76.6,76.3,77,77.2,77.2,77.5,77.8,78.3,78.3,78.4,78.8,79,79.3,79.8,80.1,80.4,80.7,80.9,80.8,80.8,72,72.4,72.9,73.2,73.4,73.5,73.4,73.4,73.3,73.6,73.9,74,74.1,73.8,73.1,73.2,73.2,73.5,73.8,74,74,73.9,73.6,73.2,73,72.8,72.8,73.1,72,71.5,71.9,72.4,73.1,73.4,73.3,73.8,73.7,73.9,74.2,74.8,74.3,74.2,74.2,74,74.1,74.2,74.2,74.5,74.7,75,75.4,75.9,76.3,76.6,76.5,76.7,64.4,64.9,65.5,65.7,66,66.6,67.1,67.4,67.8,68.2,68.7,68.5,68.4,68.4,68.6,68.8,68.9,69.3,69.4,69.3,69.4,69.6,69.8,70.2,70.5,70.2,70.5,70.6,69.2,69.7,69.8,70.1,69.9,70.8,71,71.2,71.2,71.8,72.4,72.3,73.1,73,72.5,72.4,72.9,72.4,73,72.8,73.4,73.5,72.8,72.7,72.2,72.1,73.8,74,68.3,66.8,67.9,69.8,70.2,69.8,70.6,71,70.8,71.3,72,72.5,72.9,73.1,73.2,74.3,75,76,76.2,76.4,77,77.2,77.7,77.9,78.1,47.1,47.8,48.2,48.6,48.8,49.1,49.7,50.2,50.6,50.3,50.8,53,53.9,54.8,55.7,56.8,57.9,59.2,60.5,61.7,62.9,64,65,65.8,66.6,67.2,67.8,68.4,75.1,75.5,75.8,76.1,76.7,76.7,77,77.2,77.4,77.6,77.8,78.2,78.5,78.7,78.8,79.1,79.5,79.5,79.8,80,80.2,80.5,80.7,80.9,81.3,81.6,81.5,81.4,77,77.2,77.4,77.5,77.8,78,78.3,78.7,78.6,78.8,79.1,79.2,79.4,79.6,80.2,80.4,80.7,81,81.1,81.2,81.4,81.6,81.8,82.1,82.5,82.5,82.8,82.8,70,69.9,69.6,69.5,70.4,71.3,72.1,72.5,72.6,73,73.1,73,72.4,72.6,72.9,73.4,73.7,73.8,72.8,72.8,72.8,72.9,72.9,73.1,73.1,73,72.8,72.8,75.5,75.7,76.1,76.2,76.5,76.7,77,77.4,77.8,78,78.3,78.6,78.7,78.8,79.4,79.7,79.9,80.1,80.2,80.3,80.4,80.5,80.7,80.6,80.9,80.7,80.5,80.6,59.2,59.3,59.4,59.6,59.3,59.5,59.5,59.2,59.4,59.4,59.4,59.4,59.5,59.6,59.8,60,60.2,60.4,60.8,61.2,61.6,62.3,63,63.6,64,64.4,64.8,65.5,77.5,77.6,77.6,77.9,78.1,78.2,78.3,78.5,78.6,78.6,78.8,79,79.2,79.1,79.1,79.3,79.6,79.4,79.8,80,80.3,80.3,80.3,80.8,81,80.8,80.9,81,63,62.5,62.5,63,63.4,65.8,67.2,66.8,66.8,68.1,68,68.6,69.3,69.4,69.7,69.5,69.9,70.9,71.4,71.3,71.7,72.1,72.5,72.8,72.8,72.9,72.6,72.6,51.9,52.3,52.4,52.9,53,53.4,53.8,54.1,54.3,54.5,54.4,54.8,55.2,55.5,55.7,55.9,56.1,56.3,56.7,56.9,57.4,57.9,58.3,58.6,58.3,59.2,60.1,60.7,68.9,69.2,69.1,69,69.5,69.2,69.4,69.7,63.5,70.1,70.4,70.7,71,71.2,71.4,71.7,71.9,72.2,72.5,72.7,72.8,73.1,71.7,72.1,72.1,72.1,73.8,74,69.5,69.2,69.2,69.6,70,70.7,71,70.9,71,71.8,72.4,72.5,72.6,72.9,72.9,73.3,73.5,74,74.2,74.6,74.9,75.2,75.7,76,75.5,76.4,76.8,59.6,59.9,60.2,60.8,61.3,61.8,62.1,62,62.1,62.6,62.9,63.3,63.9,64.5,65.2,65.5,65.8,66,66.2,66.5,66.7,66.9,67.3,67.7,68.1,68.4,68.6,69,63.9,64.3,64.8,65.2,65.6,66,66.4,66.7,66.9,67,67.3,67.6,67.8,68,66.5,68.5,68.7,69,69.2,69.4,69.7,70,70.3,70.5,70.8,71,71.2,71.5,68.1,70.4,70.9,71.3,71.8,72.1,72.5,72.7,73.1,73.3,73.6,73.7,73.8,72.9,74.2,74.3,74.5,74.7,74.9,75,75.2,75.4,75.7,75.9,76.2,76.5,77,77.3,74.9,75.1,75.3,75.4,75.7,75.6,75.9,76,76.2,76.3,76.6,77.2,77.7,78.2,78.5,79,79.3,79.6,79.7,79.8,80.7,80.8,80.8,81.1,81.4,81.6,81.8,81.8,77.4,77.1,76.9,77.4,77.6,77.7,77.9,78.1,78.2,78.5,78.7,78.9,78.7,79.4,79.8,80.1,80.3,80.6,80.9,81.3,81.8,81.9,82.2,82.4,81.9,82.6,82.9,83,77.1,77.1,77.4,77.7,77.8,78.1,78.4,78.7,78.8,79.2,79.6,79.8,80.1,80.1,80.7,80.9,81.2,81.4,81.5,81.7,82,82.1,82.2,82.5,82.7,82.6,83,83.2,75,75.3,74.8,74.7,74.4,74.2,74.1,74,73.9,73.7,74,74.2,75,75.9,76.5,77.2,77.3,76.4,75.6,75,75.8,75.7,75.3,74.7,74.5,74.6,74.5,74.7,79.3,79.4,79.5,79.7,80.1,80,80.5,80.8,80.8,81,81.4,81.7,82,82.1,82.3,82.3,82.6,82.8,82.9,83.1,83.1,82.9,83.4,83.6,83.8,84.1,84.2,84.2,71,71.2,71.5,71.4,71.5,71.6,71.7,71.9,72.1,72.4,72.8,73.1,73.4,74,74.4,74.6,75,75.8,76.6,77.2,77.6,78,78.4,78.7,78.9,79.1,79.2,79.3,68.5,68.2,67.5,66.4,65.6,64.6,64.4,64.8,65.4,66,65.5,65.5,65.5,65.3,65.3,65.3,65.5,66.2,67.2,68.2,68.4,68.9,69.5,70.3,71.2,71.7,71.8,72,61.9,61.3,60.5,59.6,58.9,58.1,57.4,56.6,56,55.8,55.6,55.7,55.8,56,56.4,56.9,57.6,58.4,59.3,60.2,61.2,62.1,62.9,63.5,64.1,64.7,65.3,65.9,79,79.2,78.7,78.8,78.6,78.6,79.3,79.4,79.5,79.3,79.2,79.2,79.5,79.6,80.2,81.2,82,82.2,82.5,82.8,82.9,83.1,83.1,66.3,66.2,65.9,65.5,65.2,65.4,65.7,66,66.2,66.7,66.9,67,67,67,67.1,67.1,67.2,67.7,68.4,69.3,69.7,70.3,70.6,71,71.3,71.9,72.5,72.7,51.9,52.5,52.9,53.3,53.7,54.3,54.8,55.4,55.9,56.5,57.1,57.6,58.4,59,59.7,60.3,61,61.7,62.4,63.1,63.8,64.5,65,65.6,66.1,66.6,67.1,67.6,66.9,69.2,69.9,69.4,70.2,70.7,70.2,70.5,70.9,71.2,70.8,70.3,70.8,72.1,72.8,73.2,73.8,74.2,74.2,74.6,74.9,75,75.2,69.2,70.4,71.4,71.7,72.2,72.3,71.8,72.2,72.2,72.1,71.4,71,70.7,71.6,73.1,73.3,73.7,74,74,74.6,74.7,74.9,75,75.4,75.6,75.8,76,76.3,76.4,76.6,76.9,77.3,77.7,78,78.3,78.4,78.7,79,79.4,79.7,80.1,80.5,80.7,80.8,81,81.1,81.3,81.4,81.4,81.6,81.7,55.4,55.7,56,55.9,56.7,57.1,57.4,57.7,58,58.6,58.9,59.6,59.8,60,60.2,60.7,61.1,61.4,61.5,61.5,61.7,61.9,62.1,62.4,62.6,63,63.2,63.5,48.6,48.1,47.5,46.8,46.1,45.6,45.1,44.7,44.4,44.3,44.6,44.9,45.3,46,46.7,47.5,48.5,49.7,51.1,52.5,54.2,56.1,58,59.6,60.9,61.7,62.4,63.2,71.3,71.5,71.7,71.9,72.1,71.9,72.1,72.4,72.7,72.6,72.8,73.2,73.4,73.4,73.7,74,74.3,74.5,74.3,74.1,74.4,74.9,74.9,75,74.6,74.6,74.7,74.7,76.5,76.7,76.9,77.3,77.5,77.6,77.8,78,78.2,78.3,78.5,78.7,79,79.1,79.2,79.3,79.5,79.6,79.9,80.2,80.4,80.7,80.9,81.1,81.3,81.2,81,81,70.1,70.6,70.5,70.5,70.7,71,71,71,71.6,71.8,72.2,72.4,72.4,72.7,73,72.9,73,73.4,73.5,73.6,74,74.3,74.2,74.5,74.4,74.5,74.5,74.8,71.4,71.8,72,72.2,72.5,72.8,73.2,73.4,73.6,74.1,74.6,74.9,75,75,75.4,75.3,75.7,75.9,75.5,75.2,75.2,75.5,75.6,75.7,75.8,75.9,75.9,75.5,61.2,61.3,61.1,60.9,60.9,60.5,60.5,60.8,61.2,61.6,62,62.4,62.8,63.2,63.5,63.9,64.4,65,65.5,65.6,66,66.7,67.2,67.8,68.3,68.6,68.8,68.9,66.6,67,67.3,67.5,67.8,67.9,68.2,68.3,68.7,68.9,69.3,69.7,70,70.3,70.5,70.8,71.1,71.4,71.6,71.9,72.1,72.3,72.6,72.9,73.2,73.5,73.7,74,50.3,50.4,50.5,50.6,50.7,50.6,50.6,50.5,50.6,50.6,50.5,50.6,50.5,50.6,50.6,50.6,50.6,50.8,51.3,51.7,52,52.5,52.9,53.8,55.1,56.2,57.3,58.4,61.6,61.6,61.5,61.1,60.3,59.8,58.9,57.9,56.8,55.7,54.5,53.9,53.1,52.6,52.4,52.6,53.3,54.5,56,57.3,59,60.9,62.6,63.9,64.9,65.5,66.2,66.5,58.3,59,59.9,60.4,61.3,62,62.8,63.6,64.3,65.1,65.7,66.4,66.5,67.3,67.5,68,68.3,68.5,68.7,69,69.2,69.4,69.6,69.9,70.2,69.6,70.6,70.9,77,77.2,77.3,77.1,77.4,77.6,77.6,77.9,78,78,78.1,78.3,78.4,78.6,79.1,79.5,79.8,80.2,80.3,80.6,80.8,81,81,81.3,81.5,81.5,81.5,81.5,75.3,75.8,76,76.1,76.6,76.5,76.8,77.2,77.8,77.9,78.3,78.6,78.7,78.9,79.3,79.7,79.9,80,80.1,80.4,80.7,80.6,81,81.3,81.3,81.5,81.7,81.6,71.9,71.8,72.2,72.3,72.7,72.8,73.2,73.8,73.8,74.6,75,75,75.1,75.2,75.5,75.6,76.3,76.5,76.8,77.1,77.6,77.7,77.7,77.6,77.4,78.1,78.5,78.8,55.5,55.5,55.6,55.5,55.5,55.4,55.2,55.4,55.3,55.2,55.2,55.4,55.7,56,56.5,57.3,57.9,58.5,59.2,59.9,60.5,61.1,61.7,62.4,62.6,63.4,63.9,64.3,76.7,77,77.1,77.4,77.6,77.9,78,78.3,78.3,78.5,78.6,78.8,79,79.5,79.8,80.1,80.4,80.5,80.7,80.8,80.9,80.8,81.5,81.5,81.9,82.3,82.4,82.3,68.8,69.2,69.7,70.2,70.6,71,71.4,71.8,72.2,72.7,73,73.4,73.7,74.1,74.5,74.9,75.1,75.2,75.2,75.3,75.2,75,75.4,76,76.2,76.4,76.9,77.1,61.7,61.4,61.4,61.4,61.4,61.2,61.3,61.3,61.5,61.7,61.9,62.1,62.3,62.4,62.6,61.8,63.1,63.5,63.7,64,64.3,64.7,65,65.3,65.5,66,66.4,66.8,75.8,76,75.8,75.7,75.9,75.9,76.2,76,76.3,77,77.4,77.7,77.8,77.8,78,78,78,78.2,78.1,78.1,78.2,78.3,78.3,78.4,78.6,78.9,79.1,79.3,74.3,74.5,74.3,73.7,73.7,74,74,74.4,74.5,74.5,74.5,74.8,74.9,74.7,74.1,74.4,74.3,74.8,74.9,74.7,74.6,74.8,75.1,74.9,75.3,75.8,75.9,76.1,70,70.5,70.3,70.6,71.2,71.4,72,72.6,73.1,74.2,74.7,75.6,76,75.9,76.3,76.8,77.4,77.9,77.9,77.4,77.5,78,78.4,78.9,79.4,80,80.2,80.3,67.9,68.5,68.4,68.7,69,69,69.3,69.3,69.4,69.5,69.3,69.2,69.1,69.1,69.2,69.1,69,69.2,69.2,69.1,69.2,69.3,69.3,69.2,69.3,69.2,69.5,69.7,71.2,70.9,71.3,72,72,72.1,72.6,72.8,73.2,73.2,73.9,74.3,74.7,74.9,75,75.2,75.3,75.3,75.6,75.9,76.4,76.7,76.8,77.1,77.6,77.5,77.8,78,74.1,74.1,74.4,74.6,75.4,75.3,75.3,75.7,76,76.3,76.7,77,77.3,77.6,78.3,78.8,79.1,79.3,79.5,79.7,80,80.4,80.6,80.9,81.2,81.5,81.5,81.4,74.1,74.9,75.5,76.1,76.6,76.6,76.9,77.2,77.3,77.6,78,78.5,78.9,79.2,79.5,79.9,80.1,80.2,69.9,70.3,69.8,69.6,69.5,69.4,69,69.1,69.9,70.7,71.1,71.1,71.1,71.4,71.9,72.2,72.7,73.2,73.3,73.4,73.7,74.5,74.6,74.9,74.9,75.1,75.2,75.2,69.5,69.3,68.2,65.5,64,64.8,66,67.1,67.4,66.2,65.5,65.5,65.3,65.1,65.3,64.8,66.3,67.3,67.5,68.4,68.1,69.8,70.2,70.7,70.8,71.3,71.8,72.1,49.4,49.2,48.9,48.4,46.5,47.5,46.5,47.7,49,49.6,50.8,52.3,53.8,55.4,57,58.7,60.3,61.8,63.1,64.3,65.2,66,66.7,67.2,67.7,68,68.5,71.7,72.2,72.6,73,73.3,73.6,73.8,74,74.3,74.5,74.7,74.8,74.7,74.7,74.8,74.7,74.7,74.7,74.7,74.7,74.8,75,75.3,75.7,76,76.2,76.6,76.9,58.4,58.8,58.9,59,59.1,59.1,59.2,59.5,59.7,60.1,60.6,61.2,61.5,62.3,62.8,63.4,63.9,64.5,65.1,65.5,65.9,66.3,66.6,66.9,67.2,67.5,67.8,68,76.1,76.5,76.9,77.1,77.2,77.3,77.8,78.2,78.6,79,79.3,79.6,80,80.6,80.9,81.1,81.5,81.9,82.2,82.9,83.2,83.4,83.6,83.9,84.2,84.4,84.7,84.8,71.5,72,72.5,72.5,73,72.8,72.8,73.1,73.5,73.7,73.9,74,74.4,74.3,74.5,74.5,74.9,75.2,75.6,75.9,76.2,76.6,76.8,76.7,77.2,77.4,73.9,73.6,73.8,73.6,74,74.7,75,75.2,75.3,75.6,76,76.2,76.5,76.5,77,77.7,78,78.2,78.6,79.1,79.5,79.8,79.9,80.2,80.9,80.8,81,81.1,65.1,65.4,65.1,65.5,64.8,64.4,62.8,60.8,59.3,57.7,55.6,54.9,53.8,52.8,52.3,52,52,52.6,53.4,54.5,56.1,57.9,59.5,61.1,62.5,63.4,64.4,66.3,72.2,72.6,73.3,73.7,73.9,74.4,74.9,75.3,75.6,75.9,76.3,76.8,77.2,77.6,78.2,78.7,79.2,79.7,80.1,80.4,80.6,80.9,81.2,81.6,82,82.3,82.5,82.6,77,77.1,77.5,77.7,77.9,78,78.2,78.7,78.9,78.9,79.4,79.7,79.8,79.6,80.2,80.5,80.9,81,81.3,81.7,82,82.1,82.3,82.6,82.7,82.6,82.9,83.1,69.7,70.6,71.1,72.1,71.9,70.7,70.7,70.4,71.2,71.6,71.6,72.7,73.6,73.7,69.3,73.8,74.2,74.4,73.7,74,74.7,75.9,76.1,76.4,76.5,76.9,77.2,77.5,77.7,77.8,78.2,78.3,78.7,78.9,79.1,79.4,79.5,79.6,79.8,79.8,80,80.3,80.2,80.6,80.8,80.9,81,81.2,81.5,81.6,81.8,81.9,82.1,82.2,82.4,82.5,77.8,77.9,78.2,78.6,78.7,78.8,79.4,79.5,79.8,80.1,80.1,80.5,80.7,80.9,81.3,81.5,81.7,81.9,82.2,82.2,82.5,82.8,82.9,83,83.3,83.5,83.8,84,54.9,54.5,53.9,53.5,53.1,52.8,52.6,52.6,52.8,53.1,53.5,54.1,54.8,55.4,56.1,56.7,57.4,58.3,59.3,60,60.9,61.8,62.8,63.9,64.9,65.6,66.2,66.7,70.7,70.8,70.8,70.6,70.4,70.3,70.1,71,71.4,71.3,71.8,72.6,73,73.6,73.8,74.8,75.4,75.9,76.3,76.8,77,77.3,77.7,78,78.1,78.2,78,78.1,57.6,57.7,57.8,57.6,57.4,57.4,57.3,57,56.9,57,56.9,56.7,56.8,56.7,56.9,56.9,57.5,57.7,58,58.6,59.2,60,60.7,61.4,62.1,62.8,63.5,64.4,69.9,70.1,70,69.6,69.4,69.8,69.7,70.3,70,69.8,70.4,70.6,71.1,71.1,71.5,71.9,72.6,72.8,72.4,73,73.6,74.4,74.6,74.3,74.4,74.4,74.3,74.2,72.5,72.6,72.7,72.8,73,73.1,73.4,73.4,73.6,73.9,74.3,74.6,74.8,75.2,75.5,75.8,76.1,76.3,76.5,76.7,77,77,77.4,77.6,77.8,77.9,78.1,78.3,68.6,69,69.2,69.7,69.9,70.3,71,71.7,72.3,72.3,74.1,74.8,75.4,75.9,76.5,76.7,77,77.4,77.7,77.5,77.6,77.8,78,78,78.1,78.3,78.6,78.9,47.6,47.1,46.8,46.7,46.7,46.9,47,47.5,47.9,48.6,49.1,50,50.7,51.5,52.5,53.8,54.9,55.9,57,58.1,59.1,60.2,61.4,62.5,63.6,64.5,65.2,65.7,70.3,69.7,69.1,68.5,67.8,66.7,67,67.8,68.8,68.4,68,68.3,68.2,68.3,68,67.8,68.5,68.1,68.3,70.1,70.8,71.5,71.6,71.8,71.8,69.2,69.6,70.5,71.2,71.5,71.7,71.8,72,72.1,72.3,72.4,72.2,71.9,71.8,71.8,72.1,72,72,72.5,72.6,72.6,72.8,72.9,72.9,72.9,72.9,73,73.1,73.1,73.2,73.3,75.8,76,76.3,76.3,76.7,76.7,77,77.2,77.4,77.6,78,78.2,78.3,78.5,79,79.3,79.4,79.7,79.8,80.2,80.4,80.8,80.9,80.9,81.1,81,80.9,81,75.6,75.7,75.9,75.8,75.8,75.9,76.3,76.6,76.8,76.8,76.9,76.9,77,77.2,77.5,77.6,77.8,78,78.2,78.4,78.7,78.8,78.9,78.9,78.9,78.8,78.6,78.6,73,73.4,73.4,73.1,73.4,73.5,73.8,74,74,74.2,74.6,74.9,74.9,74.9,75.1,75.5,76,75.5,76.1,76.4,76.4,76.3,76.3,76.6,77,77,77,77,72.1,72.6,72.6,72.5,72.1,72.4,73,73.7,73.7,70.1,74,74,74,73.5,74.7,75.2,75.2,75,74.7,74.8,75.3,75.3,75.2,75.2,75,68.9,69.1,69.4,69.6,69.9,70.2,70.5,70.7,71.1,71.3,71.5,71.7,71.9,72.1,72.3,72.5,72.7,72.8,73,73.2,73.5,73.6,73.8,74,74.1,74.3,74.4,74.5,50.7,49.5,48.4,47.6,46.8,46.1,45.7,45.5,45.5,45.6,46,46.1,47,47.6,48.4,49.3,50.2,51.5,53,54.5,56,57.5,58.8,60,61.1,62,62.8,63.2,60.9,59.5,57.6,55.6,53.8,52,50.8,49.6,48.5,47.5,46.6,46.2,45.6,45.4,45.1,45.1,45.4,45.9,46.3,47.2,49.7,52.4,54.9,56.8,58.5,59.6,60.5,61.4],"y":[1840,1330,1240,1370,1490,1700,1870,1680,1840,2090,2240,2450,2570,2730,2890,3060,3260,3490,3780,3930,4090,4210,4280,4330,4410,4520,4680,4860,6250,6720,7160,7640,7990,7670,7990,8540,8770,8380,8220,7780,6850,7380,7960,8580,9170,9900,10200,9500,10400,10900,10600,10800,10400,10600,10200,10400,1800,1600,948,885,956,1040,1120,1170,1270,1320,1400,1550,1760,2020,2240,2570,2930,3360,3630,3140,3220,3370,3600,3710,3820,3920,3920,4200,35900,35300,35000,36100,37100,38100,39100,40200,41600,43200,44300,44600,45800,46600,47900,48800,49400,51000,51800,51800,52000,52600,53700,54100,54700,55100,55700,56100,33900,34700,35000,34900,35600,36500,37300,38100,39400,40700,42000,42400,42900,43100,44000,44600,46000,47500,48100,46100,46900,48100,48200,47900,47800,47800,48300,49100,3170,3100,2360,1790,1420,1230,1240,1300,1410,1510,1660,1810,1960,2150,2330,2950,3920,4860,5270,5640,5840,5680,5720,5980,6070,6060,5810,5760,17900,19400,20200,22200,21600,21900,22200,22300,22600,22800,23000,22400,22000,22100,22100,22100,21800,21800,21600,20800,20700,20500,20900,21800,22400,22400,22300,22100,411,416,429,439,447,460,470,481,496,508,525,541,552,568,588,618,650,687,720,748,781,822,866,907,951,1000,1060,1130,3100,3060,2760,2550,2250,2020,2090,2340,2540,2640,2810,2960,3130,3370,3780,4160,4610,5030,5560,5580,6030,6370,6480,6540,6650,6380,6220,6380,32700,33100,33500,33100,34000,34800,35200,36400,37000,38300,39600,39900,40400,40600,41900,42600,43400,44700,44600,43300,44100,44300,44400,44400,44900,45500,45900,46600,834,840,835,854,842,863,873,895,904,924,950,971,985,989,1000,989,999,1030,1050,1040,1040,1040,1060,1100,1140,1130,1130,1170,1360,1400,1390,1420,1460,1490,1530,1570,1620,1590,1600,1600,1610,1620,1660,1700,1750,1800,1880,1910,1960,2020,2090,2200,2290,2360,2430,2490,4130,4310,4310,4280,4330,4530,4680,4950,4860,5210,5210,5130,5340,5490,5540,5690,6040,6400,6660,6030,6430,6730,6940,7650,7860,7610,7800,7860,7980,7960,7790,8020,8310,8540,8590,8740,8640,8550,8800,8800,8950,8940,9350,9540,9810,10300,10700,10600,11300,11600,11700,12000,12000,11400,11000,11000,37100,37200,37800,36900,37100,37700,37800,36400,35400,35700,35900,36200,36800,37200,36800,36300,37400,37000,35800,34800,35300,36100,36000,34700,33400,32900,31700,31800,4710,4360,4090,4060,4150,4280,4530,3910,4100,3780,3980,4220,4570,4840,5190,5610,6030,6480,6920,6730,6810,7010,7080,7140,7320,7660,8010,8350,384,408,398,401,395,406,439,454,473,494,489,507,514,538,546,576,594,600,616,616,648,670,692,711,720,727,748,771,510,321,342,351,355,362,398,431,454,475,507,550,613,669,726,764,753,786,828,874,923,973,1020,1080,1140,1340,1250,1180,1060,1050,1060,1070,1100,1120,1140,1150,1170,1180,1200,1250,1240,1250,1280,1290,1280,1290,1300,1330,1360,1400,1440,1470,1480,33700,32600,32500,33000,34100,34700,34900,36000,36700,37800,39300,39500,40400,41500,42800,44500,45900,48500,48500,46500,47400,48500,48800,49400,50300,50300,50200,51200,5930,6290,6880,7210,7460,8000,8430,8930,9200,9050,9420,9620,9810,10100,10700,11200,11800,12300,12600,12200,12800,13500,14000,14500,14600,14700,14800,14700,729,786,887,998,1120,1220,1330,1440,1540,1640,1770,1900,2060,2250,2470,2730,3060,3480,3800,4130,4550,4960,5330,5710,6100,6500,6910,7350,4470,4470,4560,4710,4890,5060,5070,5150,5090,4800,4860,4870,4910,5030,5230,5400,5690,6000,6130,6130,6340,6710,6910,7200,7450,7580,7630,7620,4880,4870,5180,5400,5500,5590,5530,5700,5960,6060,6170,6270,6380,6550,6730,6890,7290,7780,8030,7850,8140,8390,8690,8790,8990,9220,9510,9780,1490,1440,1390,1330,1300,1350,1410,1410,1440,1420,1360,1330,1280,1230,1220,1220,1210,1200,1210,1220,1210,1130,1220,1300,1380,1460,1530,1600,8570,9190,9860,10100,10000,10500,11200,11800,12500,13000,13500,14200,14900,15200,14100,13900,13900,13700,13600,13700,14100,14700,15400,20400,20100,21400,21000,21800,23200,23100,23400,24500,25500,26700,27400,28100,28500,29600,30600,31500,32400,32700,31200,31000,30400,28900,27000,26800,27900,29600,30700,14000,12400,12300,12300,12700,13500,14000,14000,13900,14200,14800,15300,15600,16100,16900,18000,19200,20200,20500,19400,19800,20100,19900,19800,20300,21400,21900,22800,44600,45100,45800,45700,47900,49100,50300,51700,52600,54000,55900,56100,56200,56300,57600,58800,60900,61200,60500,57200,58000,58600,58500,58800,59400,60400,61900,62700,2700,2670,2910,3070,3100,3210,3350,3590,3770,3930,4050,4090,4210,4100,4140,4470,4820,5110,5210,5190,5560,5660,5750,5960,6300,6660,7030,7270,3720,3790,3780,3770,3840,3840,3830,3910,3950,3690,3660,3740,3830,3870,4110,4260,4370,4390,4600,4550,4630,4920,5120,5300,5410,5330,5180,5210,1560,1540,1570,1590,1620,1660,1710,1760,1830,1900,1980,2010,2020,2050,2090,2150,2250,2370,2500,2570,2640,2640,2630,2630,2650,2700,2760,2820,2140,2150,2260,2360,2440,2530,2520,2580,2620,2660,2670,2670,2700,2730,2740,2800,2910,2950,3010,2930,2980,3080,3160,3210,3250,3310,3380,3440,6740,6780,7210,7680,8780,9250,9180,10100,10700,11500,12500,13400,14800,16300,17600,16800,14400,14800,15900,16500,16800,17300,17600,18100,19100,208,187,164,179,179,184,200,200,188,192,197,208,205,195,215,234,252,273,295,312,342,369,390,419,449,483,514,548,33400,31200,30000,29700,30700,31900,33000,34900,36800,38300,40400,41400,42000,42700,44300,45400,47000,49300,49400,45200,46500,47400,46500,45900,45600,45600,46800,48100,32500,32700,33000,32700,33300,33900,34300,35000,36100,37100,38300,38800,38900,39000,39800,40200,40900,41600,41500,40100,40600,41300,41300,41300,41500,41800,42100,43000,3700,2900,1580,1110,1010,1080,1240,1420,1500,1570,1630,1740,1850,2070,2200,2430,2670,3030,3110,3020,3230,3500,3750,3900,4070,4190,4300,4510,32400,33800,34200,33700,34400,34800,35000,35500,36300,36900,37900,38500,38400,38100,38500,38800,40400,41600,42100,39800,41500,44000,44100,44100,44900,45300,46000,46900,816,835,842,858,862,874,891,905,924,942,953,967,986,1010,1040,1080,1120,1140,1210,1230,1300,1450,1540,1620,1630,1630,1640,1740,19400,19700,19700,19300,19600,19900,20400,21200,21900,22500,23300,24100,25000,26300,27600,27700,29200,30100,29900,28500,26900,24500,22800,22300,22600,22600,22700,23100,2200,2220,2260,2290,2330,2380,2400,2440,2500,2540,2570,2570,2600,2610,2640,2670,2760,2870,2910,2870,2900,2970,3000,3060,3140,3210,3240,3290,542,541,543,556,563,573,583,598,604,612,613,622,641,637,639,645,639,667,679,656,672,695,720,732,741,750,810,869,1560,1470,1510,1570,1530,1570,1560,1580,1600,1540,1610,1610,1630,1660,1720,1780,1850,1920,1960,1870,1900,1940,1980,2000,2030,2070,2110,2180,8860,8590,8550,8810,8960,8980,9280,9670,9990,10500,10900,11500,12000,12600,13100,13700,13700,13900,13000,13100,13400,13300,13600,14200,14700,15100,15800,581,576,595,611,639,675,712,727,758,810,827,852,869,922,979,1040,1110,1170,1190,1270,1360,1410,1470,1540,1640,1750,1880,1990,1710,1790,1880,1970,2080,2220,2360,2430,2080,2070,2140,2190,2260,2340,2420,2520,2630,2760,2890,2980,3120,3270,3420,3560,3690,3820,3970,4120,4130,4540,4580,4560,4420,4460,4630,4590,4630,4610,4820,4790,5080,5450,5620,5740,5950,6370,6320,6310,6600,6700,6120,6040,6230,6070,6790,6950,24300,24600,25300,25800,27200,29700,31600,34700,37400,40800,44100,45700,47600,48200,50500,52300,53500,54700,51200,48100,48700,48700,48600,49000,52800,65400,67100,71800,21500,21800,22700,23000,24100,25000,25600,26000,26400,26500,27700,27100,26600,26400,27000,27500,28600,29700,30000,29600,30700,31600,31700,32400,33000,33100,33700,34200,30900,31300,31600,31300,31900,32900,33300,33900,34500,35000,36300,37000,37100,36900,37200,37300,37900,38300,37700,35500,36000,36200,35000,34000,33700,34000,34500,35100,4280,4460,4500,4880,4900,4970,4910,4810,4650,4660,4660,4690,4750,4890,4930,4940,5060,5110,5040,4800,4700,4760,4700,4700,4700,4720,4760,4790,38100,39300,39500,39200,39400,40400,41500,41900,41300,41100,42200,42200,42200,42700,43700,44400,45000,45700,45200,42700,44500,44500,45300,46200,46500,47100,47400,48500,2470,2390,2680,2650,2650,2710,2680,2700,2730,2770,2840,2930,3050,3100,3280,3430,3570,3700,3790,3800,3690,3590,3490,3410,3350,3310,3270,3260,5890,5210,4940,4510,4000,3740,3810,3940,3930,4080,4490,5110,5610,6110,6650,7230,7920,8520,8700,8570,9070,9600,9920,10400,10600,10600,10600,10900,917,900,865,841,837,848,858,838,841,837,820,828,810,811,830,855,886,921,898,902,952,983,1000,1030,1060,1090,1130,1160,41800,41500,40500,39200,36100,36100,35100,35600,41300,44800,48000,49300,49600,47900,41900,38600,39900,40300,38700,37200,36000,35900,33400,1100,993,846,715,571,535,564,611,615,628,654,683,676,716,757,748,763,820,880,895,880,921,905,984,1000,1020,1040,1070,462,469,481,497,524,548,574,601,613,647,673,700,730,763,799,843,901,953,1010,1070,1140,1210,1290,1370,1460,1540,1620,1710,5140,5330,5870,6300,6530,6960,7500,8130,8900,9740,10900,12300,13700,13300,11600,11300,12300,13000,13400,13800,14300,14700,15400,5320,5630,6150,6650,6630,6930,7440,8010,8920,9620,10500,11500,12900,13400,11500,12000,13000,13600,14300,14900,15400,15900,16900,65900,70700,71000,73000,74800,74800,74800,78100,81800,87500,93500,94700,97300,97700,99800,101000,105000,112000,109000,102000,105000,105000,102000,104000,106000,108000,110000,109000,563,512,503,499,484,477,472,474,477,484,490,504,428,456,466,474,485,498,517,482,472,466,467,465,468,470,476,481,332,353,325,355,318,367,387,392,396,397,393,364,361,373,383,385,393,419,438,461,479,488,483,494,508,508,506,513,4540,4840,5130,5500,5860,6280,6730,7040,6360,6590,7010,6890,7110,7370,7720,7970,8260,8610,8850,8560,9040,9370,9740,10100,10500,10900,11200,11700,12000,12500,12900,13300,14000,14800,15200,15900,16600,17300,18300,18300,18700,19100,19000,19600,19900,20600,21200,20500,21100,21300,21700,22400,23900,25900,26800,27800,3810,3930,4130,4290,4410,4560,4760,4970,5220,5290,5660,5810,5860,6160,6390,6460,6750,7100,7460,7680,8000,8310,8580,8850,9160,9480,9830,10200,7790,7970,8100,8120,8370,7720,8110,8530,8840,8950,9250,9090,8960,8970,9190,9270,9550,9620,9590,8950,9270,9480,9690,9690,9840,10000,10200,10300,1760,1580,1420,1360,1380,1460,1480,1520,1560,1600,1600,1630,1690,1790,1960,2080,2230,2420,2600,2530,2640,3040,3350,3670,3880,3900,3870,4000,1730,1820,1750,1700,1850,1730,1910,1860,1970,1960,1980,2100,2130,2240,2320,2360,2510,2570,2690,2770,2840,2950,3000,3090,3130,3220,3210,3310,216,221,200,213,218,215,232,251,270,294,289,315,334,347,364,377,402,421,440,455,471,492,514,535,558,579,584,589,3500,3680,3830,3680,3660,3720,3750,3830,3880,3940,4010,3990,4120,4230,4680,4720,4970,5140,5190,5110,5320,5490,5670,5880,6110,6270,6140,6010,354,367,372,376,396,400,411,422,426,437,455,469,463,474,490,500,511,522,548,568,592,612,643,671,711,732,730,779,35700,36300,36600,36800,37700,38700,39800,41400,43000,44900,46400,47200,47000,46800,47600,48400,50000,51800,52700,50500,51000,51500,50800,50600,51100,51900,52700,53900,25100,23700,23700,24900,25800,26700,27200,27400,27400,28700,29400,30200,31100,31800,32600,33300,33900,34600,33900,33600,33700,34200,34800,35400,36200,36800,37400,37700,1130,1100,1080,1050,1060,1100,1150,1180,1200,1260,1290,1310,1300,1320,1370,1410,1450,1500,1530,1460,1500,1580,1660,1720,1780,1840,1900,1960,1520,1480,1510,1440,1380,1350,1370,1380,1380,1350,1380,1430,1610,1680,1790,1860,1920,1990,2070,2180,2290,2350,2380,2480,2560,2560,2460,2410,60200,61800,63600,65100,68000,70400,73600,77000,78600,79600,81700,82900,83700,83900,86800,88400,89800,91600,90900,88200,87700,87400,88600,88400,89200,90000,90200,91500,14500,14700,15200,15500,15500,15900,16100,17000,17400,17400,18200,18800,18300,17400,17200,17200,17600,17800,18600,18900,18800,17400,17600,17100,16400,16200,16200,15600,737,752,788,780,787,804,819,804,801,808,820,828,829,856,900,937,970,994,988,993,987,993,1010,1030,1050,1080,1120,1160,4060,4350,4610,4770,4800,4790,4880,5090,5360,5450,5490,5420,5440,5560,5870,6170,6590,7240,7810,7770,8080,8840,9540,10000,10400,10800,11100,11500,3550,3580,3550,3630,3730,3900,3870,3940,3860,3730,3570,3470,3410,3490,3570,3590,3700,3850,4040,3970,4360,4480,4390,4700,4860,4940,5090,5270,2650,2650,2590,2670,2950,3110,3140,3280,3210,3200,3240,3220,3360,3460,3600,3800,4050,4360,4720,4730,5080,5360,5640,5920,6000,6110,6260,6310,1590,1540,1510,1500,1530,1570,1620,1670,1620,1630,1670,1680,1710,1760,1840,1890,1960,2050,2110,2100,2220,2260,2380,2500,2610,2740,2890,3040,5950,5510,5630,5830,6120,6540,6930,7370,7710,8070,8530,8640,8820,9140,9610,9950,10600,11300,11800,12100,12600,13200,13400,13600,14100,14600,15100,15800,16700,17400,17600,17300,17400,18100,18600,19400,20200,20900,21500,21800,21800,21500,21900,22000,22300,22800,22900,22100,22500,22100,21300,21300,21500,22000,22500,23400,60800,60900,62600,61100,65900,61600,65800,65200,65000,63200,67400,69700,67600,66400,65600,65100,64300,63600,5380,4730,4350,4420,4600,4900,5110,4870,4780,4770,4900,5220,5620,5800,6440,6780,7370,8020,8910,8490,8210,8420,8630,8970,9310,9710,10200,11000,9570,9060,7740,7070,6180,5930,5710,5800,5510,5880,6490,6850,7210,7770,8360,8930,9690,10500,11100,10200,10700,11100,11600,11700,11600,11400,11400,11600,381,382,427,420,303,332,354,355,344,353,369,408,410,434,467,498,523,566,585,612,645,683,698,723,768,793,803,18100,20200,20300,19500,19100,18700,18800,18700,18900,17800,18400,17700,16700,18000,18900,19400,19400,19200,19800,18900,19300,20600,21000,20900,21100,21400,21300,20700,1070,1070,1050,1030,1000,1030,1020,1030,1070,1110,1120,1140,1120,1160,1200,1240,1240,1260,1280,1270,1280,1260,1290,1290,1340,1380,1430,1500,22600,23400,24200,26300,28300,29500,30400,31900,30100,31600,33900,32600,33600,35600,38600,40500,42800,44700,43200,42000,47200,49200,50100,51700,53100,54000,55000,57400,7700,7820,8270,8730,9290,9820,10200,10200,10300,10700,11200,11800,12400,13200,14400,15900,16800,15800,16700,17200,17500,17600,18000,18900,19300,19800,15500,14100,13400,13800,14500,15100,15600,16400,17000,17900,18500,19100,19700,20300,21200,21900,23100,24600,25400,23300,23500,23700,23000,22700,23300,23800,24600,25700,6060,5850,5590,5520,5560,5620,5750,5790,5730,5780,5940,6020,6160,6270,6470,6730,7020,7300,7430,7220,7330,7450,7500,7560,7580,7560,7480,7480,8500,9320,9790,10400,11200,12200,13000,13700,12900,14300,15400,16000,17200,17600,18500,19200,20100,21200,21700,21700,23100,23800,24200,24900,25500,26100,26700,27500,22500,23000,23100,22800,23200,23700,24300,25100,26100,27100,28400,29300,29700,30000,30400,31000,31800,32300,32100,30600,30500,30100,29200,28900,29400,30500,31400,32300,1190,1230,1270,1340,1400,1470,1510,1600,1670,1730,1830,1780,1840,1930,2020,2130,2280,2410,2540,2610,2800,3010,3290,3370,3510,3650,3770,3860,37800,37100,36500,35500,36600,37900,38400,39600,41200,43000,44900,45500,46300,47200,49100,50300,52300,53700,53100,50300,52900,54100,53400,53600,54500,56300,56800,57500,64300,63000,62200,61600,61900,61800,61800,63100,64800,65600,67800,68300,67900,67400,68800,70500,72800,75100,75800,73200,74600,75000,75000,75500,76400,76600,77000,77700,516,509,495,484,477,479,488,493,500,512,522,540,562,583,610,637,660,685,704,720,743,777,788,817,846,872,904,937,2500,2690,2870,3080,3300,3530,3690,3550,3240,3350,3460,3540,3730,3970,4190,4340,4530,4750,4800,4740,5080,5090,5440,5560,5590,5740,5920,6140,587,570,535,445,501,526,557,617,584,580,559,548,554,577,557,517,517,497,503,517,534,553,574,593,612,631,649,661,5820,5970,6530,6450,6650,6870,7340,7880,8510,9180,9790,10200,10900,12400,13400,14100,15900,16600,17100,16200,16700,16500,16600,16900,16600,16800,15700,15300,2220,2260,2380,2390,2420,2430,2560,2670,2760,2900,3000,3090,3100,3230,3400,3490,3640,3840,3970,4040,4140,4020,4140,4220,4300,4310,4310,4340,6770,6710,6930,7340,6890,7320,7730,8190,8240,7840,8240,7630,8000,8330,9010,9690,10300,10600,10600,9980,10700,11700,12000,12800,13300,13900,14100,14900,398,406,406,426,439,475,503,513,523,549,549,560,590,609,630,649,696,732,771,797,816,865,870,872,886,900,910,910,3970,3620,3260,2800,2170,1920,1740,1700,1690,1700,1820,2010,2130,2350,2660,2760,2980,3230,3320,2840,2970,3140,3150,3160,3120,2830,2900,2990,68800,65500,63900,61100,61800,62700,63100,64900,61800,60300,63300,60900,59200,60400,60300,56100,53300,47300,42500,36000,33900,34600,35400,37000,38500,40200,41000,41500,28700,28300,28300,29000,30000,30700,31400,32500,33600,34600,35700,36600,37300,38300,39000,40000,40800,41500,41000,39000,39400,39700,40000,40600,41400,42000,42500,43000,36100,35500,36300,36800,37800,38400,39400,40600,41900,43400,44700,44700,45100,46000,47300,48500,49400,49900,49300,47600,48500,48900,49600,50200,51000,52100,52600,53400,6880,7070,7580,7720,8220,8050,8430,9090,9440,9210,9000,8640,7970,8040,8450,9080,9440,10000,10700,11200,12000,12600,13000,13500,13900,13900,14100,14400,12000,12800,13300,13000,12500,12700,12400,12900,12700,11700,11900,12100,10800,9830,11400,12400,13400,14400,14900,14200,13800,14200,14700,14700,14000,433,450,478,507,542,583,628,670,700,724,765,804,847,897,955,1020,1080,1150,1200,1250,1320,1390,1440,1510,1580,1670,1750,1850,1040,1020,975,1020,907,910,941,951,921,938,949,973,991,1030,1080,1130,1180,1250,1310,1390,1490,1530,1590,1620,1640,1640,1650,1660,1390,1430,1270,1270,1360,1350,1470,1490,1520,1500,1450,1460,1330,1100,1030,971,932,890,726,803,948,1070,1220,1230,1230,1230,1220,1260],"z":[2.98,2.91,2.83,2.75,2.67,2.59,2.51,2.42,2.33,2.25,2.16,2.07,1.98,1.9,1.82,1.75,1.7,1.67,1.65,1.65,1.65,1.67,1.69,1.7,1.71,1.71,1.71,1.71,2.99,2.95,2.91,2.87,2.82,2.76,2.71,2.66,2.62,2.59,2.56,2.54,2.52,2.5,2.47,2.45,2.43,2.41,2.4,2.38,2.37,2.36,2.35,2.34,2.32,2.31,2.29,2.28,2.54,2.48,2.4,2.3,2.18,1.8,1.8,1.7,1.5,1.4,1.3,1.2,1.2,1.4,1.4,1.4,1.3,1.4,1.4,1.6,1.55,1.5,1.73,1.71,1.69,1.66,1.63,1.6,1.88,1.86,1.87,1.85,1.84,1.82,1.81,1.79,1.77,1.76,1.76,1.76,1.78,1.79,1.82,1.86,1.89,1.92,1.94,1.94,1.93,1.92,1.9,1.89,1.87,1.86,1.85,1.84,1.46,1.51,1.51,1.5,1.47,1.42,1.45,1.39,1.37,1.34,1.37,1.33,1.39,1.38,1.42,1.41,1.41,1.38,1.41,1.39,1.44,1.44,1.46,1.47,1.48,1.49,1.49,1.5,3.09,3.02,2.93,2.82,2.71,2.58,2.45,2.33,2.21,2.11,2.03,1.96,1.91,1.87,1.84,1.82,1.82,1.84,1.87,1.91,1.96,2.01,2.05,2.08,2.09,2.09,2.08,2.06,3.74,3.6,3.47,3.34,3.21,3.1,3.01,2.93,2.86,2.81,2.77,2.72,2.67,2.6,2.53,2.45,2.37,2.29,2.23,2.18,2.14,2.12,2.09,2.08,2.07,2.05,2.03,2.01,4.55,4.37,4.2,4.03,3.88,3.73,3.6,3.47,3.35,3.23,3.12,3.01,2.91,2.8,2.7,2.61,2.52,2.44,2.38,2.32,2.28,2.24,2.21,2.18,2.16,2.13,2.1,2.08,1.9,1.82,1.73,1.64,1.55,1.47,1.4,1.34,1.29,1.26,1.24,1.24,1.24,1.26,1.29,1.32,1.36,1.4,1.45,1.5,1.54,1.58,1.62,1.65,1.67,1.69,1.7,1.71,1.58,1.59,1.6,1.6,1.61,1.61,1.61,1.61,1.61,1.62,1.63,1.65,1.68,1.7,1.73,1.76,1.78,1.8,1.81,1.81,1.81,1.8,1.8,1.79,1.79,1.79,1.79,1.79,6.74,6.68,6.6,6.53,6.45,6.36,6.28,6.2,6.12,6.04,5.96,5.89,5.82,5.75,5.69,5.63,5.58,5.52,5.47,5.42,5.36,5.31,5.25,5.18,5.12,5.05,4.98,4.91,4.91,4.87,4.81,4.74,4.66,4.58,4.47,4.37,4.27,4.16,4.06,3.96,3.87,3.77,3.68,3.6,3.51,3.43,3.35,3.27,3.2,3.13,3.07,3.02,2.97,2.92,2.88,2.84,4.54,4.41,4.29,4.18,4.06,3.95,3.84,3.72,3.61,3.49,3.39,3.29,3.19,3.11,3.04,2.99,2.95,2.92,2.9,2.89,2.88,2.88,2.86,2.84,2.81,2.77,2.73,2.68,2.81,2.72,2.64,2.58,2.54,2.5,2.49,2.46,2.43,2.37,2.3,2.23,2.16,2.1,2.03,1.98,1.93,1.88,1.85,1.82,1.81,1.79,1.78,1.77,1.75,1.74,1.73,1.71,3.53,3.44,3.32,3.2,3.06,2.93,2.78,2.63,2.49,2.36,2.22,2.12,2.03,1.95,1.89,1.85,1.82,1.81,1.81,1.82,1.84,1.86,1.87,1.88,1.89,1.88,1.87,1.86,1.77,1.69,1.6,1.51,1.42,1.34,1.28,1.23,1.2,1.18,1.18,1.19,1.22,1.26,1.3,1.34,1.38,1.42,1.45,1.47,1.49,1.5,1.51,1.52,1.53,1.55,1.56,1.58,7.01,6.98,6.95,6.92,6.88,6.84,6.8,6.75,6.7,6.65,6.59,6.53,6.47,6.4,6.34,6.27,6.19,6.12,6.04,5.95,5.87,5.78,5.69,5.61,5.52,5.44,5.35,5.27,5.05,4.87,4.69,4.5,4.33,4.15,3.97,3.81,3.65,3.52,3.41,3.31,3.23,3.16,3.09,3.02,2.95,2.88,2.81,2.74,2.68,2.63,2.59,2.56,2.53,6.44,6.35,6.26,6.17,6.07,5.98,5.89,5.8,5.72,5.65,5.58,5.52,5.48,5.43,5.39,5.35,5.31,5.27,5.22,5.17,5.11,5.05,4.98,4.92,4.85,4.78,4.71,4.64,1.66,1.67,1.68,1.67,1.66,1.64,1.61,1.58,1.56,1.54,1.52,1.52,1.52,1.53,1.55,1.57,1.6,1.62,1.63,1.64,1.64,1.63,1.62,1.61,1.6,1.59,1.58,1.57,2.55,2.5,2.46,2.41,2.36,2.31,2.27,2.23,2.18,2.14,2.11,2.07,2.05,2.02,2,1.98,1.96,1.95,1.93,1.9,1.88,1.86,1.83,1.82,1.8,1.79,1.77,1.77,2.35,2.19,2.02,1.87,1.74,1.64,1.57,1.53,1.5,1.49,1.5,1.51,1.52,1.54,1.55,1.57,1.57,1.58,1.58,1.59,1.59,1.59,1.6,1.6,1.61,1.62,1.62,1.63,2.99,2.93,2.86,2.79,2.73,2.66,2.6,2.54,2.48,2.43,2.39,2.35,2.31,2.27,2.24,2.2,2.16,2.12,2.08,2.04,2.01,1.98,1.95,1.92,1.9,1.87,1.85,1.83,3.17,3.11,3.04,2.97,2.9,2.82,2.74,2.65,2.56,2.46,2.37,2.29,2.22,2.16,2.11,2.07,2.03,2.01,1.98,1.95,1.92,1.89,1.87,1.84,1.82,1.8,1.78,1.77,6.5,6.4,6.3,6.22,6.14,6.06,5.99,5.92,5.85,5.78,5.71,5.65,5.58,5.52,5.47,5.42,5.38,5.34,5.3,5.26,5.22,5.18,5.14,5.08,5.03,4.97,4.91,4.85,1.52,1.51,1.51,1.49,1.47,1.44,1.42,1.39,1.38,1.37,1.38,1.4,1.41,1.43,1.45,1.47,1.48,1.49,1.49,1.49,1.47,1.46,1.45,2.41,2.38,2.34,2.28,2.21,2.12,2.04,1.95,1.86,1.78,1.72,1.66,1.61,1.58,1.55,1.52,1.5,1.48,1.46,1.44,1.42,1.41,1.39,1.37,1.36,1.35,1.34,1.34,1.8,1.74,1.66,1.58,1.48,1.39,1.3,1.22,1.17,1.13,1.12,1.14,1.17,1.21,1.25,1.3,1.35,1.39,1.42,1.45,1.47,1.48,1.49,1.5,1.51,1.52,1.54,1.56,1.67,1.68,1.76,1.75,1.81,1.81,1.75,1.75,1.72,1.74,1.77,1.75,1.72,1.76,1.78,1.8,1.85,1.85,1.89,1.84,1.88,1.76,1.73,1.88,1.83,1.79,1.74,1.75,3.47,3.4,3.33,3.26,3.2,3.13,3.07,3.01,2.97,2.93,2.89,2.86,2.84,2.81,2.78,2.75,2.72,2.69,2.66,2.63,2.6,2.57,2.54,2.51,2.48,2.45,2.42,2.39,3.77,3.68,3.59,3.51,3.44,3.36,3.29,3.23,3.16,3.09,3.03,2.97,2.91,2.87,2.83,2.79,2.76,2.74,2.71,2.68,2.66,2.63,2.6,2.57,2.54,2.51,2.49,2.46,4.66,4.46,4.25,4.05,3.87,3.71,3.57,3.46,3.37,3.29,3.23,3.18,3.13,3.09,3.05,3.02,3,3.02,3.06,3.11,3.19,3.25,3.31,3.34,3.34,3.31,3.27,3.21,3.96,3.89,3.82,3.74,3.66,3.58,3.48,3.38,3.26,3.14,3.02,2.9,2.79,2.69,2.6,2.53,2.47,2.41,2.36,2.31,2.27,2.22,2.19,2.16,2.13,2.1,2.08,2.06,1.6,1.51,1.43,1.38,1.34,1.32,1.31,1.32,1.34,1.38,1.43,1.48,1.54,1.58,1.62,1.64,1.65,1.64,1.63,1.62,1.61,1.61,1.62,1.63,1.65,7.25,7.19,7.14,7.09,7.05,7,6.94,6.86,6.77,6.66,6.53,6.38,6.22,6.04,5.87,5.69,5.52,5.36,5.2,5.06,4.92,4.8,4.68,4.56,4.44,4.32,4.2,4.08,1.79,1.8,1.85,1.81,1.85,1.81,1.76,1.75,1.71,1.73,1.73,1.73,1.72,1.76,1.8,1.8,1.84,1.83,1.85,1.86,1.87,1.83,1.8,1.85,1.83,1.8,1.77,1.78,1.75,1.74,1.72,1.72,1.72,1.72,1.73,1.75,1.77,1.79,1.82,1.84,1.87,1.89,1.92,1.94,1.96,1.97,1.98,1.99,1.99,1.99,1.99,1.98,1.98,1.98,1.98,1.98,2.18,2.13,2.08,2.01,1.95,1.88,1.81,1.75,1.69,1.64,1.61,1.59,1.59,1.6,1.63,1.66,1.71,1.77,1.82,1.87,1.92,1.95,1.98,2,2,2,2,1.99,1.36,1.34,1.32,1.31,1.31,1.31,1.32,1.33,1.34,1.35,1.35,1.35,1.35,1.35,1.35,1.35,1.36,1.36,1.37,1.38,1.39,1.41,1.42,1.43,1.44,1.45,1.46,1.47,5.6,5.5,5.4,5.32,5.24,5.17,5.1,5.04,4.97,4.9,4.83,4.75,4.68,4.61,4.55,4.49,4.44,4.39,4.35,4.31,4.27,4.23,4.19,4.15,4.1,4.04,3.98,3.93,1.47,1.44,1.42,1.4,1.38,1.37,1.36,1.35,1.33,1.33,1.32,1.33,1.34,1.36,1.38,1.4,1.42,1.44,1.44,1.43,1.41,1.39,1.37,1.35,1.33,1.31,1.31,1.3,5.44,5.38,5.32,5.25,5.17,5.09,4.99,4.9,4.8,4.7,4.6,4.49,4.37,4.25,4.11,3.97,3.83,3.7,3.58,3.47,3.38,3.29,3.22,3.15,3.09,3.03,2.97,2.92,6.6,6.57,6.54,6.49,6.44,6.39,6.33,6.27,6.21,6.15,6.08,6.02,5.95,5.88,5.8,5.73,5.65,5.58,5.5,5.42,5.34,5.26,5.18,5.09,5.01,4.93,4.86,4.78,5.14,5.05,4.95,4.85,4.75,4.64,4.53,4.41,4.29,4.17,4.06,3.94,3.82,3.69,3.57,3.45,3.33,3.2,3.09,2.98,2.87,2.78,2.69,2.62,2.56,2.51,2.46,2.42,1.78,1.74,1.69,1.63,1.56,1.49,1.43,1.37,1.33,1.31,1.29,1.29,1.29,1.3,1.3,1.31,1.32,1.32,1.33,1.33,1.33,1.33,1.34,1.35,1.36,1.37,1.39,4.05,3.96,3.88,3.8,3.72,3.65,3.58,3.51,3.45,3.38,3.31,3.24,3.18,3.11,3.04,2.97,2.9,2.82,2.75,2.67,2.6,2.53,2.48,2.43,2.38,2.35,2.33,2.3,3.12,3.02,2.93,2.84,2.76,2.69,2.63,2.58,2.54,2.52,2.51,2.51,2.51,2.51,2.52,2.51,2.51,2.51,2.5,2.49,2.48,2.47,2.46,2.44,2.41,2.39,2.36,2.34,4.82,4.48,4.14,3.81,3.5,3.22,2.96,2.73,2.53,2.36,2.21,2.09,2,1.93,1.87,1.83,1.81,1.79,1.78,1.77,1.77,1.76,1.74,1.73,1.71,1.69,1.66,1.64,2,1.95,1.92,1.9,1.9,1.9,1.91,1.92,1.93,1.94,1.95,1.96,1.96,1.97,1.98,1.98,1.99,1.99,2,2,2,2,2,2,1.99,1.99,1.99,1.98,3,2.97,2.95,2.94,2.93,2.92,2.92,2.92,2.92,2.92,2.92,2.92,2.91,2.91,2.91,2.91,2.92,2.93,2.95,2.97,3,3.01,3.03,3.03,3.02,3,2.97,2.95,1.3,1.29,1.27,1.26,1.25,1.24,1.23,1.23,1.23,1.24,1.25,1.27,1.29,1.31,1.34,1.36,1.38,1.4,1.41,1.42,1.43,1.43,1.43,1.44,1.45,1.46,1.47,1.48,2.95,2.9,2.86,2.83,2.8,2.77,2.74,2.7,2.67,2.62,2.58,2.53,2.48,2.44,2.4,2.36,2.33,2.29,2.25,2.21,2.17,2.14,2.1,2.07,2.05,2.03,2.01,1.99,1.56,1.53,1.5,1.47,1.44,1.41,1.39,1.37,1.35,1.34,1.32,1.31,1.3,1.3,1.3,1.31,1.32,1.33,1.34,1.36,1.37,1.39,1.4,1.42,1.43,1.44,1.46,1.47,5.49,5.29,5.1,4.92,4.75,4.61,4.47,4.35,4.23,4.13,4.03,3.95,3.88,3.83,3.78,3.75,3.73,3.71,3.69,3.68,3.66,3.64,3.6,3.56,3.51,3.45,3.38,3.31,2.83,2.73,2.61,2.48,2.36,2.24,2.13,2.05,1.98,1.94,1.92,1.94,1.99,2.07,2.16,2.26,2.37,2.47,2.55,2.62,2.67,2.7,2.7,2.7,2.68,2.66,2.63,2.6,6.07,5.9,5.76,5.63,5.54,5.46,5.4,5.35,5.3,5.24,5.18,5.11,5.04,4.98,4.91,4.84,4.76,4.68,4.58,4.48,4.37,4.27,4.17,4.07,3.99,3.92,3.85,3.79,2.72,2.8,2.86,2.9,2.89,2.85,2.77,2.69,2.62,2.55,2.5,2.45,2.4,2.34,2.28,2.22,2.15,2.09,2.05,2.01,1.99,1.97,1.96,3.89,3.8,3.69,3.57,3.44,3.3,3.16,3.02,2.88,2.76,2.66,2.58,2.54,2.52,2.54,2.58,2.65,2.73,2.82,2.91,2.98,3.04,3.08,3.09,3.08,3.05,3.01,2.96,6.15,6.05,5.93,5.77,5.59,5.39,5.17,4.94,4.72,4.51,4.31,4.14,3.98,3.85,3.72,3.62,3.52,3.42,3.33,3.24,3.15,3.06,2.97,2.9,2.82,2.76,2.7,2.64,1.36,1.27,1.22,1.18,1.17,1.18,1.21,1.25,1.3,1.35,1.4,1.43,1.46,1.49,1.5,1.51,1.51,1.51,1.51,1.52,1.53,1.54,1.56,1.64,1.57,1.5,1.44,1.38,1.34,1.31,1.29,1.29,1.3,1.32,1.35,1.39,1.43,1.47,1.51,1.54,1.57,1.6,1.62,1.64,1.65,1.66,1.56,1.6,1.64,1.67,1.69,1.71,1.72,1.72,1.72,1.71,1.7,1.68,1.67,1.66,1.65,1.64,1.63,1.62,1.61,1.59,1.58,1.57,1.56,1.55,1.56,1.56,1.57,1.58,6.18,6.15,6.12,6.08,6.03,5.98,5.91,5.84,5.75,5.65,5.55,5.45,5.34,5.24,5.14,5.05,4.96,4.87,4.78,4.69,4.6,4.52,4.44,4.37,4.3,4.24,4.18,4.13,6.92,6.8,6.68,6.58,6.5,6.42,6.36,6.31,6.26,6.2,6.15,6.1,6.05,6,5.96,5.9,5.83,5.73,5.61,5.47,5.31,5.15,4.99,4.86,4.74,4.65,4.57,4.51,3.55,3.51,3.47,3.42,3.37,3.31,3.24,3.15,3.04,2.91,2.78,2.66,2.54,2.44,2.36,2.29,2.25,2.22,2.19,2.17,2.15,2.13,2.11,2.09,2.07,2.06,2.04,2.02,2.03,2.02,2.01,2,1.99,1.97,1.93,1.89,1.83,1.75,1.67,1.6,1.53,1.47,1.42,1.4,1.38,1.38,1.38,1.38,1.39,1.4,1.41,1.42,1.43,1.44,1.46,1.47,2.29,2.28,2.25,2.22,2.18,2.14,2.1,2.07,2.04,2.01,1.99,1.96,1.94,1.9,1.87,1.82,1.78,1.72,1.67,1.62,1.58,1.54,1.51,1.48,1.46,1.44,1.43,1.43,3.47,3.37,3.27,3.18,3.1,3.02,2.95,2.88,2.82,2.77,2.72,2.67,2.62,2.58,2.54,2.5,2.46,2.42,2.39,2.36,2.34,2.32,2.3,2.27,2.24,2.22,2.18,2.15,4.05,3.75,3.45,3.18,2.94,2.74,2.57,2.43,2.31,2.22,2.14,2.1,2.08,2.08,2.11,2.17,2.24,2.33,2.43,2.54,2.64,2.72,2.77,2.81,2.81,2.79,2.76,2.71,4.06,3.9,3.75,3.6,3.45,3.3,3.16,3.04,2.93,2.85,2.78,2.72,2.68,2.64,2.61,2.59,2.57,2.56,2.56,2.57,2.58,2.58,2.58,2.57,2.56,2.53,2.49,2.45,6.21,6.17,6.12,6.07,6.02,5.96,5.92,5.88,5.85,5.83,5.82,5.81,5.8,5.78,5.76,5.74,5.71,5.67,5.64,5.6,5.56,5.52,5.47,5.42,5.37,5.31,5.24,5.18,5.23,5.1,4.97,4.84,4.72,4.59,4.47,4.35,4.23,4.12,4.02,3.93,3.84,3.77,3.71,3.67,3.64,3.62,3.61,3.61,3.61,3.6,3.59,3.56,3.52,3.47,3.42,3.35,5.17,5.1,5.02,4.93,4.83,4.72,4.6,4.47,4.33,4.18,4.03,3.88,3.72,3.58,3.43,3.29,3.15,3.01,2.87,2.74,2.61,2.49,2.38,2.29,2.22,2.16,2.12,2.08,1.62,1.61,1.59,1.57,1.57,1.53,1.53,1.56,1.63,1.65,1.72,1.71,1.73,1.75,1.73,1.71,1.72,1.72,1.77,1.79,1.8,1.76,1.76,1.77,1.76,1.75,1.74,1.75,2.4,2.36,2.31,2.22,2.13,2.11,2.07,2.05,1.96,2,1.98,1.96,1.95,1.98,2.02,2.05,2.09,2.11,2.12,2.13,2.12,2.1,2.07,2.05,2.03,2.01,1.99,1.98,4.6,4.43,4.27,4.11,3.94,3.78,3.62,3.47,3.33,3.2,3.08,2.98,2.89,2.81,2.74,2.68,2.62,2.57,2.52,2.48,2.43,2.38,2.34,2.3,2.26,2.23,2.2,2.17,6.49,6.44,6.4,6.35,6.3,6.26,6.22,6.19,6.16,6.13,6.11,6.08,6.06,6.04,6.01,5.99,5.96,5.93,5.9,5.87,5.84,5.8,5.76,5.71,5.65,5.59,5.53,5.46,1.93,1.92,1.88,1.86,1.87,1.87,1.89,1.86,1.81,1.85,1.85,1.78,1.75,1.8,1.83,1.84,1.9,1.9,1.96,1.98,1.95,1.88,1.85,1.91,1.87,1.84,1.82,1.82,7.17,6.83,6.47,6.1,5.72,5.35,4.98,4.63,4.3,3.99,3.72,3.48,3.29,3.14,3.03,2.95,2.91,2.89,2.89,2.9,2.9,2.9,2.88,2.85,2.8,2.74,2.67,2.59,6.02,5.9,5.76,5.62,5.48,5.34,5.2,5.05,4.89,4.73,4.58,4.44,4.31,4.21,4.13,4.07,4.02,3.98,3.94,3.9,3.86,3.8,3.74,3.68,3.62,3.55,3.48,3.41,3.06,3,2.95,2.91,2.88,2.85,2.83,2.81,2.79,2.77,2.74,2.72,2.7,2.68,2.66,2.65,2.64,2.64,2.63,2.63,2.62,2.61,2.6,2.59,2.57,2.54,2.51,2.49,4.55,4.46,4.37,4.28,4.2,4.11,4.01,3.91,3.8,3.68,3.55,3.43,3.32,3.21,3.12,3.04,2.97,2.91,2.85,2.79,2.73,2.68,2.63,2.58,2.54,2.51,2.48,2.45,3.83,3.72,3.62,3.51,3.41,3.32,3.23,3.14,3.06,2.99,2.93,2.87,2.82,2.77,2.73,2.68,2.65,2.62,2.59,2.57,2.55,2.53,2.5,2.48,2.46,2.43,2.4,2.37,4.32,4.25,4.18,4.11,4.06,4.01,3.96,3.92,3.89,3.85,3.81,3.77,3.71,3.65,3.58,3.5,3.43,3.35,3.28,3.21,3.16,3.11,3.07,3.03,2.99,2.96,2.93,2.89,2.08,2.03,1.97,1.9,1.82,1.73,1.65,1.56,1.48,1.41,1.35,1.31,1.28,1.28,1.28,1.3,1.32,1.34,1.36,1.37,1.37,1.36,1.34,1.33,1.32,1.31,1.3,1.29,1.52,1.5,1.48,1.47,1.46,1.46,1.45,1.45,1.46,1.46,1.46,1.46,1.45,1.44,1.43,1.42,1.4,1.38,1.36,1.34,1.33,1.31,1.29,1.28,1.26,1.25,1.25,1.24,3.24,3.12,3,2.86,2.71,2.57,2.43,2.31,2.21,2.13,2.07,2.03,2,1.97,1.95,1.93,1.91,1.89,1.87,1.74,1.61,1.51,1.43,1.37,1.34,1.32,1.31,1.31,1.31,1.31,1.32,1.33,1.36,1.38,1.4,1.43,1.45,1.46,1.47,1.48,1.49,1.49,1.5,1.51,1.52,1.53,1.89,1.73,1.55,1.37,1.4,1.34,1.27,1.22,1.23,1.16,1.2,1.22,1.29,1.33,1.34,1.29,1.3,1.41,1.49,1.54,1.57,1.59,1.62,1.66,1.7,1.74,1.75,1.76,7.18,6.94,6.71,6.51,6.17,6.05,5.94,5.84,5.74,5.64,5.54,5.45,5.35,5.24,5.14,5.02,4.9,4.77,4.64,4.52,4.39,4.27,4.16,4.06,3.97,3.89,3.81,5.91,5.76,5.59,5.41,5.2,4.98,4.75,4.53,4.33,4.14,3.97,3.83,3.71,3.6,3.51,3.42,3.33,3.24,3.15,3.06,2.96,2.87,2.78,2.7,2.64,2.58,2.53,2.49,6.53,6.43,6.32,6.21,6.11,6,5.88,5.77,5.67,5.57,5.47,5.39,5.31,5.25,5.2,5.16,5.13,5.11,5.1,5.08,5.06,5.04,5,4.96,4.9,4.84,4.77,4.7,1.83,1.73,1.72,1.74,1.71,1.67,1.66,1.61,1.48,1.47,1.6,1.41,1.37,1.27,1.26,1.26,1.28,1.29,1.28,1.26,1.26,1.26,1.26,1.25,1.25,1.24,1.25,1.25,1.89,1.81,1.72,1.63,1.53,1.45,1.38,1.31,1.27,1.24,1.23,1.22,1.23,1.25,1.27,1.29,1.32,1.34,1.36,1.37,1.38,1.4,1.41,1.43,1.44,1.46,1.48,1.42,1.37,1.33,1.29,1.27,1.25,1.24,1.22,1.21,1.21,1.21,1.22,1.24,1.27,1.31,1.36,1.4,1.44,1.48,1.52,1.54,1.57,1.58,1.6,1.61,1.63,1.64,3.65,3.53,3.41,3.29,3.2,3.11,3.04,2.97,2.92,2.87,2.83,2.79,2.76,2.73,2.7,2.68,2.66,2.64,2.62,2.6,2.59,2.57,2.55,2.53,2.51,2.49,2.46,2.43,1.58,1.6,1.63,1.64,1.64,1.62,1.58,1.53,1.47,1.41,1.35,1.29,1.25,1.21,1.18,1.17,1.16,1.16,1.17,1.18,1.19,1.21,1.22,1.24,1.26,1.28,1.3,1.31,1.34,1.31,1.28,1.25,1.23,1.21,1.2,1.2,1.2,1.21,1.23,1.25,1.28,1.3,1.33,1.35,1.37,1.38,1.38,1.38,1.37,1.35,1.35,1.34,1.34,1.35,1.36,1.38,2.48,2.43,2.39,2.35,2.32,2.29,2.27,2.25,2.24,2.24,2.24,2.25,2.26,2.27,2.28,2.28,2.28,2.27,2.26,2.23,2.2,2.17,2.14,2.11,2.08,2.06,2.05,2.03,2.14,2.11,2.08,1.98,1.88,1.73,1.6,1.53,1.52,1.51,1.56,1.58,1.67,1.73,1.77,1.79,1.87,1.89,1.92,1.94,1.99,1.9,1.91,1.92,1.92,1.91,1.91,1.91,1.55,1.54,1.54,1.53,1.53,1.52,1.5,1.49,1.47,1.45,1.44,1.43,1.42,1.42,1.42,1.43,1.44,1.46,1.47,1.49,1.5,1.51,1.52,1.53,1.54,1.54,1.55,1.55,6.21,6.15,6.08,6.01,5.95,5.88,5.83,5.78,5.74,5.71,5.69,5.68,5.67,5.66,5.65,5.64,5.62,5.58,5.54,5.49,5.43,5.36,5.29,5.22,5.15,5.08,5.02,4.95,2.11,2.06,2,1.96,1.91,1.87,1.82,1.78,1.74,1.71,1.67,1.64,1.62,1.6,1.58,1.57,1.56,1.56,1.55,1.55,1.55,1.54,1.53,1.52,1.51,1.5,1.48,1.47,6.32,6.2,6.08,5.97,5.86,5.76,5.67,5.59,5.52,5.46,5.41,5.36,5.32,5.28,5.23,5.18,5.12,5.06,5,4.94,4.87,4.8,4.73,4.66,4.59,4.52,4.45,4.38,2.45,2.34,2.23,2.13,2.04,1.96,1.9,1.84,1.8,1.77,1.75,1.74,1.74,1.75,1.76,1.77,1.78,1.79,1.8,1.8,1.81,1.8,1.8,1.79,1.78,1.77,1.75,1.74,3.48,3.28,3.09,2.91,2.75,2.61,2.49,2.38,2.29,2.21,2.14,2.09,2.05,2.02,2,1.99,2,2.02,2.06,2.1,2.14,2.18,2.21,2.23,2.23,2.22,2.2,2.18,3.11,3.02,2.94,2.87,2.81,2.76,2.71,2.66,2.61,2.56,2.5,2.45,2.4,2.35,2.31,2.27,2.24,2.21,2.19,2.17,2.16,2.14,2.12,2.11,2.09,2.07,2.05,2.03,7.09,7.08,7.07,7.06,7.04,7.02,6.99,6.97,6.94,6.9,6.87,6.82,6.77,6.72,6.65,6.58,6.51,6.42,6.34,6.25,6.15,6.06,5.96,5.87,5.78,5.68,5.59,5.5,1.81,1.74,1.66,1.58,1.49,1.41,1.34,1.27,1.22,1.17,1.15,1.14,1.15,1.17,1.2,1.25,1.3,1.34,1.38,1.42,1.45,1.47,1.49,1.5,1.51,1.53,1.54,1.55,4.45,4.25,4.04,3.83,3.62,3.42,3.23,3.06,2.91,2.77,2.64,2.53,2.43,2.33,2.24,2.15,2.07,2.01,1.95,1.9,1.87,1.84,1.82,1.8,1.78,1.77,1.75,1.73,1.81,1.8,1.79,1.78,1.77,1.76,1.74,1.73,1.71,1.69,1.68,1.67,1.67,1.69,1.72,1.76,1.8,1.84,1.86,1.88,1.89,1.89,1.89,1.88,1.88,1.88,1.87,1.87,2.07,2.06,2.04,2.02,2,1.98,1.98,1.97,2,2.01,2.05,2.03,2.02,2.05,2.06,2.06,2.11,2.12,2.07,2,1.93,1.9,1.9,1.96,1.95,1.93,1.92,1.91,2.52,2.51,2.49,2.47,2.44,2.4,2.36,2.33,2.29,2.27,2.24,2.22,2.21,2.19,2.17,2.16,2.14,2.13,2.11,2.09,2.08,2.06,2.05,2.03,2.02,2.01,2,1.98,3.45,3.37,3.29,3.22,3.15,3.08,3.02,2.97,2.92,2.87,2.82,2.78,2.74,2.7,2.66,2.63,2.6,2.56,2.53,2.5,2.47,2.44,2.42,2.39,2.37,3.55,3.42,3.26,3.09,2.9,2.71,2.53,2.36,2.21,2.1,2.01,1.95,1.92,1.9,1.89,1.89,1.9,1.91,1.92,1.94,1.95,1.95,1.96,1.96,1.96,1.96,1.95,1.95,6.44,6.38,6.33,6.28,6.23,6.19,6.15,6.12,6.09,6.07,6.04,6,5.96,5.92,5.86,5.79,5.72,5.64,5.56,5.48,5.4,5.32,5.24,5.17,5.1,5.04,4.98,4.93,5.18,5,4.84,4.69,4.56,4.43,4.33,4.24,4.16,4.1,4.06,4.02,4,3.99,3.98,3.99,3.99,4,4.01,4.02,4.03,4.02,4,3.96,3.9,3.84,3.76,3.68],"mode":"markers","type":"scatter3d","marker":{"colorbar":{"title":"cluster","ticklen":2},"cmin":1,"cmax":3,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666666","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,2,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"line":{"colorbar":{"title":"","ticklen":2},"cmin":1,"cmax":3,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666666","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":false,"color":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,2,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]}},"frame":null},{"x":[44.3,84.8],"y":[164,112000],"type":"scatter3d","mode":"markers","opacity":0,"hoverinfo":"none","showlegend":false,"marker":{"colorbar":{"title":"cluster","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"cmin":1,"cmax":3,"colorscale":[["0","rgba(68,1,84,1)"],["0.0416666666666666","rgba(70,19,97,1)"],["0.0833333333333334","rgba(72,32,111,1)"],["0.125","rgba(71,45,122,1)"],["0.166666666666667","rgba(68,58,128,1)"],["0.208333333333333","rgba(64,70,135,1)"],["0.25","rgba(60,82,138,1)"],["0.291666666666667","rgba(56,93,140,1)"],["0.333333333333333","rgba(49,104,142,1)"],["0.375","rgba(46,114,142,1)"],["0.416666666666667","rgba(42,123,142,1)"],["0.458333333333333","rgba(38,133,141,1)"],["0.5","rgba(37,144,140,1)"],["0.541666666666667","rgba(33,154,138,1)"],["0.583333333333333","rgba(39,164,133,1)"],["0.625","rgba(47,174,127,1)"],["0.666666666666667","rgba(53,183,121,1)"],["0.708333333333333","rgba(79,191,110,1)"],["0.75","rgba(98,199,98,1)"],["0.791666666666667","rgba(119,207,85,1)"],["0.833333333333333","rgba(147,214,70,1)"],["0.875","rgba(172,220,52,1)"],["0.916666666666667","rgba(199,225,42,1)"],["0.958333333333333","rgba(226,228,40,1)"],["1","rgba(253,231,37,1)"]],"showscale":true,"color":[1,3],"line":{"color":"rgba(255,127,14,1)"}},"z":[1.12,7.25],"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>library(GGally)
+full_clust &lt;- full_tidied %&gt;% select(life_expectancy, GDP_Per_Capita, 
+    CO2_emission, fertility) %&gt;% daisy(&quot;gower&quot;) %&gt;% pam(k = 2, 
+    diss = T)
+full_tidied %&gt;% mutate(cluster = as.factor(full_clust$clustering)) %&gt;% 
+    ggpairs(columns = 3:6, aes(color = cluster))</code></pre>
+<p><img src="../project1_files/figure-html/unnamed-chunk-10-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The results from the cluster analysis further emphasize the negative relationship between fertility and all other variables. 2 clusters was determined to be preferable for examining the data through a silhouette width test. However, the data was also examined by looking at three clusters. In this first plot, the correlation between GDP per capita and life expectancy was examined with the context of using clusters determined using all variables. 3 cluster centers were identified at the data points of 1996 Morocco, 2013 Lithuania, and 2005 Belgium. This means that each of these data points are representative of the average data for a single cluster as a whole.
+A 3-Dimensional plot was used in order to help visualize correlations between more than 2 variables, in this case, GDP per capita, fertility, and life expectancy. This plot shows that the cluster with high levels of GDP also has high life expectancy and low fertility. The fertility is particularly low at the extremely high end of GDP per capita.The other 2 clusters are divided largely on the basis of fertility and life expectancy, as both clusters have comparable values for GDP per capita. One of these 2 clusters has low life expectancy, ranging from about 45-70 years, and high fertility, ranging from slightly above 2 all the way up to above 7. The second of these 2 clusters acts as an intermediate between the two other clusters, and has a life expectancy ranging from approximately 55 years up to just above 80 years. The fertility of this cluster ranges from just above 1 to just below 6. The final, multi-paneled plot again reinforces the negative correlation between fertility and the other variables.</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../js/docs.min.js"></script>
+<script src="../js/main.js"></script>
+
+<script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

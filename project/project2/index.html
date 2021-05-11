@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Cole Pringle" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Possum Data Analysis</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project2/">Possum Data Analysis</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="r-markdown" class="section level2">
+<h2>R Markdown</h2>
+<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
+<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<pre class="r"><code>library(DAAG)
+possum$case &lt;- NULL
+possum &lt;- possum%&gt;%drop_na()</code></pre>
+<p>Possum dataset:
+This dataset comes from 104 possums (3 removed due to NAs) captured in Australia. They were captured in 2 areas, Victoria or elsewhere. Their sexes were recorded, and then ages and many different physical measurements, such as total length, were determined. The site variable refers to seven sites at which the possums were captured, 2 sites in the Victoria population and 5 sites elsewhere. 1 MANOVA test and 11 ANOVAs were run. Using the Bonferroni method for controlling type I errors, the significant p value of 0.05 is divided by 12 to get 0.004</p>
+<p>#MANOVA</p>
+<pre class="r"><code>possum_man &lt;- manova(cbind(site,age,hdlngth,skullw,totlngth,taill,footlgth,earconch,eye,chest,belly)~sex, data=possum)
+summary(possum_man)</code></pre>
+<pre><code>## Df Pillai approx F num Df den Df Pr(&gt;F)
+## sex 1 0.23084 2.4283 11 89 0.01078 *
+## Residuals 99
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(possum_man)</code></pre>
+<pre><code>## Response site :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 32.59 32.591 6.1151 0.01511 *
+## Residuals 99 527.63 5.330
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response age :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 1.23 1.2263 0.3321 0.5657
+## Residuals 99 365.57 3.6926
+##
+## Response hdlngth :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 17.45 17.446 1.4149 0.2371
+## Residuals 99 1220.69 12.330
+##
+## Response skullw :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 10.48 10.482 1.0898 0.299
+## Residuals 99 952.18 9.618
+##
+## Response totlngth :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 40.93 40.930 2.3553 0.128
+## Residuals 99 1720.39 17.378
+##
+## Response taill :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 0.35 0.3477 0.0886 0.7666
+## Residuals 99 388.40 3.9233
+##
+## Response footlgth :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 36.64 36.642 1.898 0.1714
+## Residuals 99 1911.26 19.306
+##
+## Response earconch :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 29.46 29.463 1.8014 0.1826
+## Residuals 99 1619.18 16.355
+##
+## Response eye :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 5.041 5.0407 4.6624 0.03324 *
+## Residuals 99 107.032 1.0811
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response chest :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 5.67 5.6724 1.3946 0.2405
+## Residuals 99 402.66 4.0673
+##
+## Response belly :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## sex 1 6.55 6.5514 0.8794 0.3506
+## Residuals 99 737.51 7.4496</code></pre>
+<pre class="r"><code>possum%&gt;%group_by(sex)%&gt;%summarize(mean(site),mean(eye))</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   sex   `mean(site)` `mean(eye)`
+##   &lt;fct&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+## 1 f             3           14.8
+## 2 m             4.15        15.2</code></pre>
+<p>A MANOVA test indicated that some numeric variables had a mean difference across levels from the sex variable. After performing univariate ANOVAs, the numeric variables that had these mean differences were determined to be site and eye. Site had a p-value of 0.015, and eye had a p-value of 0.033. 1 MANOVA test and 11 ANOVAs were run. Using the Bonferroni method for controlling type I errors, the significant p value of 0.05 is divided by 12 to get 0.004. Based on this new value, neither site or eye variables were significant. The MANOVA assumption of random sampling and independent observations is likely to have been met in this dataset, but without knowing exactly how the possums were collected, this can’t be known for sure. Another MANOVA assumption includes there being no extreme univaraite or multivariate outliers, which this analysis seems to fit.</p>
+<p>#Randomization</p>
+<pre class="r"><code>library(dplyr)
+vic &lt;- possum%&gt;%slice(1:43)
+other &lt;- possum%&gt;%slice(44:101)
+other_tot &lt;- other%&gt;%select(totlngth)%&gt;%pull
+vic_tot &lt;- vic%&gt;%select(totlngth)%&gt;%pull
+vic_totc &lt;- c(vic_tot)
+other_totc &lt;- c(other_tot)
+pop_length&lt;-data.frame(Pop=c(rep(&quot;vic&quot;,43),rep(&quot;other&quot;,58)),totlngth=c(vic_tot,other_tot))
+head(pop_length)</code></pre>
+<pre><code>##   Pop totlngth
+## 1 vic     89.0
+## 2 vic     91.5
+## 3 vic     95.5
+## 4 vic     92.0
+## 5 vic     85.5
+## 6 vic     90.5</code></pre>
+<pre class="r"><code>ggplot(pop_length,aes(totlngth,fill=Pop)) + geom_histogram(bins = 8) + facet_wrap(~Pop, ncol = 2) + theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean(vic_tot)#larger</code></pre>
+<pre><code>## [1] 87.9186</code></pre>
+<pre class="r"><code>mean(other_tot)</code></pre>
+<pre><code>## [1] 86.78793</code></pre>
+<pre class="r"><code>mean(vic_tot)-mean(other_tot)</code></pre>
+<pre><code>## [1] 1.130674</code></pre>
+<pre class="r"><code>pop_length%&gt;%group_by(Pop)%&gt;%
+  summarize(means=mean(totlngth))%&gt;%summarize(`mean_diff:`=diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1         1.13</code></pre>
+<pre class="r"><code>head(perm1&lt;-data.frame(Pop=pop_length$Pop,totlngth=sample(pop_length$totlngth)))</code></pre>
+<pre><code>##   Pop totlngth
+## 1 vic     89.0
+## 2 vic     82.0
+## 3 vic     82.5
+## 4 vic     80.5
+## 5 vic     86.0
+## 6 vic     86.5</code></pre>
+<pre class="r"><code>perm1%&gt;%group_by(Pop)%&gt;%
+  summarize(means=mean(totlngth))%&gt;%summarize(`mean_diff:`=diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1        -1.03</code></pre>
+<pre class="r"><code>rand_samp &lt;- vector()
+
+new_poss &lt;- possum
+for (i in 1:5000) {
+  new_poss &lt;- data.frame(totlngth=sample(pop_length$totlngth),Pop=pop_length$Pop)
+  rand_samp[i]&lt;-mean(new_poss[new_poss$Pop==&quot;vic&quot;,]$totlngth)-
+    mean(new_poss[new_poss$Pop==&quot;other&quot;,]$totlngth)
+}
+head(rand_samp)</code></pre>
+<pre><code>## [1] 0.4300722 0.3288292 0.3004812 1.3007618 1.6773857
+0.3814755</code></pre>
+<pre class="r"><code>hist(rand_samp,main=&quot;&quot;,ylab=&quot;&quot;); abline(v=c(-1.131,1.131),col=&quot;red&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-3-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean(rand_samp&gt;1.131 | rand_samp &lt; -1.131)</code></pre>
+<pre><code>## [1] 0.1738</code></pre>
+<p>The null hypothesis for this test would be:
+There is no difference in total body length of the possums between males and females.
+The alternative hypothesis for this test would be:
+There is difference in total body length of the possums between males and females.
+The significance value of the difference of means is 0.1722, greater than 0.05, so the null hypothesis is accepted, it cannot be stated that male and female possums differ significantly in total body length.</p>
+<p>#Linear Regression</p>
+<pre class="r"><code>library(sandwich);library(lmtest)
+possum$belly_c &lt;- possum$belly - mean(possum$belly)
+possum$taill_c &lt;- possum$taill - mean(possum$taill)
+
+glimpse(possum)</code></pre>
+<pre><code>## Rows: 101
+## Columns: 15
+## $ site &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+## $ Pop &lt;fct&gt; Vic, Vic, Vic, Vic, Vic, Vic, Vic, Vic, Vic,
+Vic, Vic, Vic, Vic, Vic, Vic, Vic, …
+## $ sex &lt;fct&gt; m, f, f, f, f, f, m, f, f, f, f, f, m, m, m,
+m, f, m, f, f, f, m, f, m, m, m, f,…
+## $ age &lt;dbl&gt; 8, 6, 6, 6, 2, 1, 2, 6, 9, 6, 9, 5, 5, 3, 5,
+4, 1, 2, 5, 4, 3, 3, 4, 2, 3, 7, 2,…
+## $ hdlngth &lt;dbl&gt; 94.1, 92.5, 94.0, 93.2, 91.5, 93.1,
+95.3, 94.8, 93.4, 91.8, 93.3, 94.9, 95.1, 95…
+## $ skullw &lt;dbl&gt; 60.4, 57.6, 60.0, 57.1, 56.3, 54.8, 58.2,
+57.6, 56.3, 58.0, 57.2, 55.6, 59.9, 57…
+## $ totlngth &lt;dbl&gt; 89.0, 91.5, 95.5, 92.0, 85.5, 90.5,
+89.5, 91.0, 91.5, 89.5, 89.5, 92.0, 89.5, 91…
+## $ taill &lt;dbl&gt; 36.0, 36.5, 39.0, 38.0, 36.0, 35.5, 36.0,
+37.0, 37.0, 37.5, 39.0, 35.5, 36.0, 36…
+## $ footlgth &lt;dbl&gt; 74.5, 72.5, 75.4, 76.1, 71.0, 73.2,
+71.5, 72.7, 72.4, 70.9, 77.2, 71.7, 71.0, 74…
+## $ earconch &lt;dbl&gt; 54.5, 51.2, 51.9, 52.2, 53.2, 53.6,
+52.0, 53.9, 52.9, 53.4, 51.3, 51.0, 49.8, 53…
+## $ eye &lt;dbl&gt; 15.2, 16.0, 15.5, 15.2, 15.1, 14.2, 14.2,
+14.5, 15.5, 14.4, 14.9, 15.3, 15.8, 15…
+## $ chest &lt;dbl&gt; 28.0, 28.5, 30.0, 28.0, 28.5, 30.0, 30.0,
+29.0, 28.0, 27.5, 31.0, 28.0, 27.0, 28…
+## $ belly &lt;dbl&gt; 36.0, 33.0, 34.0, 34.0, 33.0, 32.0, 34.5,
+34.0, 33.0, 32.0, 34.0, 33.0, 32.0, 31…
+## $ belly_c &lt;dbl&gt; 3.3613861, 0.3613861, 1.3613861,
+1.3613861, 0.3613861, -0.6386139, 1.8613861, 1.…
+## $ taill_c &lt;dbl&gt; -1.04950495, -0.54950495, 1.95049505,
+0.95049505, -1.04950495, -1.54950495, -1.0…</code></pre>
+<pre class="r"><code>lin_fit &lt;- lm(belly_c~Pop*taill_c, data = possum)
+coef(lin_fit)</code></pre>
+<pre><code>## (Intercept) Popother taill_c Popother:taill_c
+## 0.8116722 -1.3744350 0.6018051 -0.0479891</code></pre>
+<pre class="r"><code>summary(lin_fit)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = belly_c ~ Pop * taill_c, data = possum)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -6.6151 -1.6023 -0.2099 1.6747 7.0054
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 0.81167 0.46356 1.751 0.08312 .
+## Popother -1.37444 0.59616 -2.305 0.02327 *
+## taill_c 0.60181 0.22467 2.679 0.00868 **
+## Popother:taill_c -0.04799 0.30017 -0.160 0.87331
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 2.575 on 97 degrees of freedom
+## Multiple R-squared: 0.1353, Adjusted R-squared: 0.1085
+## F-statistic: 5.059 on 3 and 97 DF, p-value: 0.00268</code></pre>
+<pre class="r"><code>possum%&gt;%ggplot(aes(taill_c,belly_c))+geom_point()+geom_smooth(method = &#39;lm&#39;,se=F)#Says if both explanatory are numeric then refer to slides. Does this mean if one is binary categorical it&#39;s not included in this plot, because I don&#39;t see how it would be unless making two plots.</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>possum%&gt;%ggplot(aes(x=taill_c, y=belly_c,group=Pop)) + geom_point(aes(color=Pop)) + 
+  geom_smooth(method = &quot;lm&quot;,fullrange=T,aes(color=Pop)) + 
+  theme(legend.position = c(.9,.19))+xlab(&quot;&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-4-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>resids&lt;-lin_fit$residuals
+fitvals&lt;-lin_fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color=&#39;red&#39;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-4-3.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot()+geom_histogram(aes(resids), bins=20)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-4-4.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>summary(lin_fit)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = belly_c ~ Pop * taill_c, data = possum)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -6.6151 -1.6023 -0.2099 1.6747 7.0054
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 0.81167 0.46356 1.751 0.08312 .
+## Popother -1.37444 0.59616 -2.305 0.02327 *
+## taill_c 0.60181 0.22467 2.679 0.00868 **
+## Popother:taill_c -0.04799 0.30017 -0.160 0.87331
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 2.575 on 97 degrees of freedom
+## Multiple R-squared: 0.1353, Adjusted R-squared: 0.1085
+## F-statistic: 5.059 on 3 and 97 DF, p-value: 0.00268</code></pre>
+<pre class="r"><code>coeftest(lin_fit, vcov = vcovHC(lin_fit))[,1:2]</code></pre>
+<pre><code>##                    Estimate Std. Error
+## (Intercept)       0.8116722  0.4540261
+## Popother         -1.3744350  0.6369932
+## taill_c           0.6018051  0.2350711
+## Popother:taill_c -0.0479891  0.3258061</code></pre>
+<pre class="r"><code>summary(lin_fit)$coef[,1:2]</code></pre>
+<pre><code>##                    Estimate Std. Error
+## (Intercept)       0.8116722  0.4635608
+## Popother         -1.3744350  0.5961639
+## taill_c           0.6018051  0.2246690
+## Popother:taill_c -0.0479891  0.3001669</code></pre>
+<p>The coefficient estimates in this regression model suggests that possums from the “other” population have belly girths that are, on average, 1.37cm less than possums from the Victoria population. For every increase of 1 cm in tail length, possums have an increase of 0.60 cm in belly girth. The intercept suggests that if all variables were at a value of zero (which would not be possible), then the belly girth would be 0.81 cm. The interaction coefficient suggests that the slope for the “other” population on belly girth is 0.048 lower for every 1 cm increase in tail length. Based on the adjusted R-squared value, the model predicts 10.85% of the variation in the response variable (belly girth). Several graphs above show that the assumptions for linear regression of linearity, normality, and homoskedasticity are all met. Independent observations/random sample is just based on how the data was gathered. When recomputing the regression results with robust standard errors no changes in values occurred in the estimate values from the regular regression stats. The standard error stats did change, with the robust standard error regression having slightly higher values for both explanatory variables and the interaction, but a lower standard error for the intercept standard error. When using the robust standard errors, the p-value was 0.0027, so the result is significant.</p>
+<p>#Bootstrapping</p>
+<pre class="r"><code>samp_boot &lt;- replicate(5000, {
+  boot_dat &lt;- sample_frac(possum, replace = T)
+  boot_fit &lt;- lm(belly_c~Pop*taill_c, data = boot_dat)
+  coef(boot_fit)
+})
+samp_boot %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)  Popother   taill_c Popother:taill_c
+## 1   0.4332294 0.6135419 0.2189089         0.312835</code></pre>
+<pre class="r"><code>boot_fit2 &lt;- lm(belly_c~Pop*taill_c,data = possum)
+resids2&lt;-boot_fit2$residuals
+boot_fitted&lt;-boot_fit2$fitted.values
+resid_resamp&lt;-replicate(5000,{
+  new_resids&lt;-sample(resids2,replace = TRUE)
+  possum$new_y&lt;-boot_fitted+new_resids
+  new_fit&lt;-lm(new_y~Pop*taill_c,data = possum)
+  coef(new_fit)
+})
+resid_resamp%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)  Popother   taill_c Popother:taill_c
+## 1   0.4562176 0.5837967 0.2183922        0.2953627</code></pre>
+<pre class="r"><code>resid_resamp%&gt;%t%&gt;%as.data.frame%&gt;%pivot_longer(1:3)%&gt;%group_by(name)%&gt;% summarize(lower=quantile(value,.025), upper=quantile(value,.975))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   name          lower  upper
+##   &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;
+## 1 (Intercept) -0.0847  1.70 
+## 2 Popother    -2.50   -0.214
+## 3 taill_c      0.166   1.03</code></pre>
+<p>#Bootstrap Comparison</p>
+<pre class="r"><code>coeftest(lin_fit)[,1:2]#Normal SEs</code></pre>
+<pre><code>##                    Estimate Std. Error
+## (Intercept)       0.8116722  0.4635608
+## Popother         -1.3744350  0.5961639
+## taill_c           0.6018051  0.2246690
+## Popother:taill_c -0.0479891  0.3001669</code></pre>
+<pre class="r"><code>coeftest(lin_fit, vcov=vcovHC(lin_fit))[,1:2]#Robust SEs</code></pre>
+<pre><code>##                    Estimate Std. Error
+## (Intercept)       0.8116722  0.4540261
+## Popother         -1.3744350  0.6369932
+## taill_c           0.6018051  0.2350711
+## Popother:taill_c -0.0479891  0.3258061</code></pre>
+<pre class="r"><code>samp_boot%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)#Bootstrapped SEs</code></pre>
+<pre><code>##   (Intercept)  Popother   taill_c Popother:taill_c
+## 1   0.4332294 0.6135419 0.2189089         0.312835</code></pre>
+<pre class="r"><code>resid_resamp%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)#Bootstrapped SEs (Residuals)</code></pre>
+<pre><code>##   (Intercept)  Popother   taill_c Popother:taill_c
+## 1   0.4562176 0.5837967 0.2183922        0.2953627</code></pre>
+<p>When bootstrapping, the “Other” population is no longer negatively correlated with belly girth, and instead suggests an increase an increase of around 0.6 cm. Tail length is still positively correlated with belly girth, but to a lesser degree. The non boostrapped data suggests that a 1cm increase in tail length indicates an increase of around 0.6 cm for belly girth. The bootstrapped data suggests that a 1 cm increase in tail length indicates an increase of aroun 0.22 cm in belly girth. Additionally, with the bootstrapped data, interaction between population “other” and tail length is now positively correlated. Instead of the slope of the “other” population on belly girth being 0.48 lower per 1 cm increase in tail length, the boostrapped data indicates that the slope actually goes up by about 0.3.</p>
+<p>#Logistic Regression</p>
+<pre class="r"><code>library(lmtest)
+poss_fit &lt;- glm(sex~footlgth + hdlngth,data = possum,family = binomial(link = &quot;logit&quot;))
+coeftest(poss_fit)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -4.454911 5.732281 -0.7772 0.43706
+## footlgth -0.109270 0.053096 -2.0580 0.03959 *
+## hdlngth 0.132554 0.069420 1.9094 0.05620 .
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>log_probs&lt;-predict(poss_fit,type = &quot;response&quot;)
+table(predict=as.numeric(log_probs&gt;.5),truth=possum$sex)%&gt;%addmargins</code></pre>
+<pre><code>##        truth
+## predict   f   m Sum
+##     0    16  10  26
+##     1    26  49  75
+##     Sum  42  59 101</code></pre>
+<pre class="r"><code>possum$logit&lt;-predict(poss_fit,type=&quot;link&quot;)
+possum%&gt;%ggplot()+geom_density(aes(logit,color=sex,fill=sex), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab(&quot;logit (log-odds)&quot;)+
+  geom_rug(aes(logit,color=sex))+
+  geom_text(x=-5,y=.07,label=&quot;TN = 431&quot;)+
+  geom_text(x=-1.75,y=.008,label=&quot;FN = 19&quot;)+
+  geom_text(x=1,y=.006,label=&quot;FP = 13&quot;)+
+  geom_text(x=5,y=.04,label=&quot;TP = 220&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>sensitivity&lt;-49/59
+specificty&lt;-16/42
+library(plotROC)
+ROCplot&lt;-ggplot(possum)+geom_roc(aes(d=sex,m=log_probs), n.cuts = 0)
+ROCplot</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-7-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.6404358</code></pre>
+<p>The coefficients in this logistic regression suggests that a 1 mm increase in foot length indicates a decrease of 0.11 in the sex statistic. This essentially means the possum is more likely to be female. A 1 mm increase in head length indicates an increase of 0.13 in the sex statistic which means the possum is more likely to be male. The intercept value is -4.455, which means if foot length and head length were zero, the sex statistic would be -4.455, but this is not possible. From the confusion matrix, various values can be determined. The accuracy is 16+49/101 = 0.64, the sensitivity is 49/59 = 0.83, the specificity is 16/42 = 0.38, the precision is 49/75 = 0.65, and the auc is 0.64. The accuracy value indicates the proportion of the possums that were correctly predicted as either male or female, meaning 64% of the time, this model could determine sex based on foot length and head length. The sensitivity indicates the proportion of the positivie cases (in this instance males) that the model correctly guessed. The specificity indicates the proportion of the females that were correctly guessed. The low value of 0.38 that means the model only correctly identified the females 38% of the time, so possums were overidentified as male. The specificity refers to the proportion of possums identified as male that actually were male. An AUC of 0.64 is fairly low and falls into the “poor” category. This essentially means the model was not particularly effective at estimating sex based on foot length and head length.</p>
+<p>#Logistic Regression 2</p>
+<pre class="r"><code>poss_fit2 &lt;- glm(sex~(.),data = possum,family = binomial(link = &quot;logit&quot;))
+coeftest(poss_fit2)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -25.248127 10.948537 -2.3061 0.02111 *
+## site 0.424196 0.281374 1.5076 0.13166
+## Popother 1.175486 1.981689 0.5932 0.55306
+## age -0.080290 0.138858 -0.5782 0.56312
+## hdlngth 0.237592 0.135971 1.7474 0.08057 .
+## skullw 0.059651 0.125590 0.4750 0.63481
+## totlngth -0.151886 0.115283 -1.3175 0.18767
+## taill -0.147440 0.220216 -0.6695 0.50316
+## footlgth 0.075305 0.131493 0.5727 0.56685
+## earconch 0.200623 0.160261 1.2519 0.21062
+## eye 0.566807 0.273669 2.0711 0.03835 *
+## chest -0.112301 0.183134 -0.6132 0.53973
+## belly -0.097970 0.120846 -0.8107 0.41754
+## belly_c NA NA NA NA
+## taill_c NA NA NA NA
+## logit NA NA NA NA
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>log_probs2&lt;-predict(poss_fit2,type = &quot;response&quot;)
+table(predict=as.numeric(log_probs2&gt;.5),truth=possum$sex)%&gt;%addmargins</code></pre>
+<pre><code>##        truth
+## predict   f   m Sum
+##     0    27  11  38
+##     1    15  48  63
+##     Sum  42  59 101</code></pre>
+<pre class="r"><code>set.seed(1234)
+k=10
+cv_data&lt;-possum[sample(nrow(possum)),]
+poss_folds&lt;-cut(seq(1:nrow(possum)),breaks=k,labels = F)
+diags&lt;-NULL
+for (i in 1:k) {
+  poss_train&lt;-possum[poss_folds!=1,]
+  poss_test&lt;-possum[poss_folds==1,]
+  poss_truth&lt;-poss_test$sex
+  cv_fit&lt;-glm(sex~(.),data = poss_train,family = &quot;binomial&quot;)
+  poss_probs&lt;-predict(cv_fit,newdata=poss_test,type=&quot;response&quot;)
+  diags&lt;-rbind(diags,class_diag(poss_probs,poss_truth))
+}
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc sens      spec       ppv auc
+## 1 0.3636364  0.5 0.3333333 0.1428571 0.5</code></pre>
+<p>Based on the confusion matrix, an accuracy value of 0.74, sensitivity value of 0.81, specificity value of 0.64, and precision value of 0.76 can be determined. Compared to the last model, this model has greatly increased its accuracy, precision, and specificity at the cost of a very slight decrease in sensitivity, from 0.83 to 0.81. Based on the 10-fold CV, the accuracy is 0.36, the sensitivity is 0.5, the specificity is 0.33, the precision is 0.14, and the AUC is 0.5. An AUC of 0.5 is very low, at the bottom of the worst bracket of categorizing them. This makes sense given that accuracy, precision, sensitivity, and specificity have all dropped significantly. This is not a good model.</p>
+<p>#Lasso</p>
+<pre class="r"><code>library(glmnet)
+y&lt;-as.matrix(possum$sex)
+x&lt;-model.matrix(sex~(.),data = possum)[,-1]
+x&lt;-scale(x)
+head(x)</code></pre>
+<pre><code>## site Popother age hdlngth skullw totlngth taill footlgth
+## C3 -1.129442 -1.155631 2.1816300 0.38914982 1.10859169
+0.4123838 -0.5322895 1.3825712
+## C5 -1.129442 -1.155631 1.1373427 -0.06556176 0.20614572
+1.0080754 -0.2786988 0.9294163
+## C10 -1.129442 -1.155631 1.1373427 0.36073035 0.97967084
+1.9611820 0.9892550 1.5864909
+## C15 -1.129442 -1.155631 1.1373427 0.13337456 0.04499465
+1.1272137 0.4820735 1.7450952
+## C23 -1.129442 -1.155631 -0.9512321 -0.34975649
+-0.21284705 -0.4215845 -0.5322895 0.5895501
+## C24 -1.129442 -1.155631 -1.4733757 0.10495508
+-0.69630025 0.7697987 -0.7858803 1.0880205
+## earconch eye chest belly belly_c taill_c logit
+## C3 1.5679274 0.14122321 0.4630244 1.2322948 1.2322948
+-0.5322895 -0.9462179
+## C5 0.7551899 0.89690770 0.7104607 0.1324853 0.1324853
+-0.2786988 -0.9336340
+## C10 0.9275888 0.42460490 1.4527697 0.4990884 0.4990884
+0.9892550 -1.1638275
+## C15 1.0014740 0.14122321 0.4630244 0.4990884 0.4990884
+0.4820735 -1.5197535
+## C23 1.2477581 0.04676265 0.7104607 0.1324853 0.1324853
+-0.5322895 -0.8725018
+## C24 1.3462717 -0.80338239 1.4527697 -0.2341179
+-0.2341179 -0.7858803 -0.9276995</code></pre>
+<pre class="r"><code>cv&lt;-cv.glmnet(x,y,family=&quot;binomial&quot;)
+lasso&lt;-glmnet(x,y,family=&quot;binomial&quot;,lambda = cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 16 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                    s0
+## (Intercept) 0.3398678
+## site        0.0000000
+## Popother    .        
+## age         .        
+## hdlngth     .        
+## skullw      .        
+## totlngth    .        
+## taill       .        
+## footlgth    .        
+## earconch    .        
+## eye         .        
+## chest       .        
+## belly       .        
+## belly_c     .        
+## taill_c     .        
+## logit       .</code></pre>
+<pre class="r"><code>set.seed(1234)
+k=10
+cv_data2&lt;-possum[sample(nrow(possum)),]
+poss_folds2&lt;-cut(seq(1:nrow(possum)),breaks=k,labels = F)
+diags2&lt;-NULL
+for (i in 1:k) {
+  poss_train2&lt;-possum[poss_folds2!=1,]
+  poss_test2&lt;-possum[poss_folds2==1,]
+  poss_truth2&lt;-poss_test2$sex
+  cv_fit2&lt;-glm(sex~site,data = poss_train2,family = &quot;binomial&quot;)
+  poss_probs2&lt;-predict(cv_fit2,newdata=poss_test2,type=&quot;response&quot;)
+  diags2&lt;-rbind(diags,class_diag(poss_probs2,poss_truth2))
+}
+summarize_all(diags2,mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv auc
+## 1 0.3471074 0.5454545 0.3030303 0.1463991 0.5</code></pre>
+<p>When performing LASSO on the model, the only variable that is retained is site. All other variables are determined to not be effective enough at predicting sex. The AUC made with the model that LASSO was used on is 0.5. Again, very very bad. It is the same as with the 10-fold CV model above and lower than the first logistic model AUC of 0.64.</p>
+<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

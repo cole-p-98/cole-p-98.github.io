@@ -1,0 +1,247 @@
+---
+title: "Possum Data Analysis"
+author: "Cole Pringle cdp2653"
+date: "5/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+
+class_diag <- function(probs,truth){ 
+  #CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV 
+  if(is.character(truth)==TRUE) truth<-as.factor(truth) 
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1 
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),factor(truth, levels=c(0,1))) 
+  acc=sum(diag(tab))/sum(tab) 
+  sens=tab[2,2]/colSums(tab)[2] 
+  spec=tab[1,1]/colSums(tab)[1] 
+  ppv=tab[2,2]/rowSums(tab)[2] 
+  
+#CALCULATE EXACT AUC 
+  ord<-order(probs, decreasing=TRUE) 
+  probs <- probs[ord]; truth <- truth[ord] 
+  TPR=cumsum(truth)/max(1,sum(truth))  
+  FPR=cumsum(!truth)/max(1,sum(!truth)) 
+  dup <-c(probs[-1]>=probs[-length(probs)], FALSE) 
+  TPR <-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1) 
+  n <- length(TPR) 
+  auc <- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n])) 
+  data.frame(acc,sens,spec,ppv,auc) 
+}
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(DAAG)
+possum$case <- NULL
+possum <- possum%>%drop_na()
+```
+Possum dataset:
+This dataset comes from 104 possums (3 removed due to NAs) captured in Australia. They were captured in 2 areas, Victoria or elsewhere. Their sexes were recorded, and then ages and many different physical measurements, such as total length, were determined. The site variable refers to seven sites at which the possums were captured, 2 sites in the Victoria population and 5 sites elsewhere. 1 MANOVA test and 11 ANOVAs were run. Using the Bonferroni method for controlling type I errors, the significant p value of 0.05 is divided by 12 to get 0.004
+
+#MANOVA
+```{r}
+possum_man <- manova(cbind(site,age,hdlngth,skullw,totlngth,taill,footlgth,earconch,eye,chest,belly)~sex, data=possum)
+summary(possum_man)
+summary.aov(possum_man)
+possum%>%group_by(sex)%>%summarize(mean(site),mean(eye))
+```
+A MANOVA test indicated that some numeric variables had a mean difference across levels from the sex variable. After performing univariate ANOVAs, the numeric variables that had these mean differences were determined to be site and eye. Site had a p-value of 0.015, and eye had a p-value of 0.033. 1 MANOVA test and 11 ANOVAs were run. Using the Bonferroni method for controlling type I errors, the significant p value of 0.05 is divided by 12 to get 0.004. Based on this new value, neither site or eye variables were significant. The MANOVA assumption of random sampling and independent observations is likely to have been met in this dataset, but without knowing exactly how the possums were collected, this can't be known for sure. Another MANOVA assumption includes there being no extreme univaraite or multivariate outliers, which this analysis seems to fit.
+
+#Randomization
+```{r}
+library(dplyr)
+vic <- possum%>%slice(1:43)
+other <- possum%>%slice(44:101)
+other_tot <- other%>%select(totlngth)%>%pull
+vic_tot <- vic%>%select(totlngth)%>%pull
+vic_totc <- c(vic_tot)
+other_totc <- c(other_tot)
+pop_length<-data.frame(Pop=c(rep("vic",43),rep("other",58)),totlngth=c(vic_tot,other_tot))
+head(pop_length)
+ggplot(pop_length,aes(totlngth,fill=Pop)) + geom_histogram(bins = 8) + facet_wrap(~Pop, ncol = 2) + theme(legend.position = "none")
+mean(vic_tot)#larger
+mean(other_tot)
+mean(vic_tot)-mean(other_tot)
+pop_length%>%group_by(Pop)%>%
+  summarize(means=mean(totlngth))%>%summarize(`mean_diff:`=diff(means))
+head(perm1<-data.frame(Pop=pop_length$Pop,totlngth=sample(pop_length$totlngth)))
+perm1%>%group_by(Pop)%>%
+  summarize(means=mean(totlngth))%>%summarize(`mean_diff:`=diff(means))
+rand_samp <- vector()
+
+new_poss <- possum
+for (i in 1:5000) {
+  new_poss <- data.frame(totlngth=sample(pop_length$totlngth),Pop=pop_length$Pop)
+  rand_samp[i]<-mean(new_poss[new_poss$Pop=="vic",]$totlngth)-
+    mean(new_poss[new_poss$Pop=="other",]$totlngth)
+}
+head(rand_samp)
+hist(rand_samp,main="",ylab=""); abline(v=c(-1.131,1.131),col="red")
+mean(rand_samp>1.131 | rand_samp < -1.131)
+
+```
+
+The null hypothesis for this test would be:
+There is no difference in total body length of the possums between males and females.
+The alternative hypothesis for this test would be:
+There is difference in total body length of the possums between males and females.
+The significance value of the difference of means is 0.1722, greater than 0.05, so the null hypothesis is accepted, it cannot be stated that male and female possums differ significantly in total body length.
+
+#Linear Regression
+```{r}
+library(sandwich);library(lmtest)
+possum$belly_c <- possum$belly - mean(possum$belly)
+possum$taill_c <- possum$taill - mean(possum$taill)
+
+glimpse(possum)
+lin_fit <- lm(belly_c~Pop*taill_c, data = possum)
+coef(lin_fit)
+summary(lin_fit)
+possum%>%ggplot(aes(taill_c,belly_c))+geom_point()+geom_smooth(method = 'lm',se=F)#Says if both explanatory are numeric then refer to slides. Does this mean if one is binary categorical it's not included in this plot, because I don't see how it would be unless making two plots.
+possum%>%ggplot(aes(x=taill_c, y=belly_c,group=Pop)) + geom_point(aes(color=Pop)) + 
+  geom_smooth(method = "lm",fullrange=T,aes(color=Pop)) + 
+  theme(legend.position = c(.9,.19))+xlab("")
+resids<-lin_fit$residuals
+fitvals<-lin_fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red')
+ggplot()+geom_histogram(aes(resids), bins=20)
+summary(lin_fit)
+coeftest(lin_fit, vcov = vcovHC(lin_fit))[,1:2]
+summary(lin_fit)$coef[,1:2]
+```
+
+The coefficient estimates in this regression model suggests that possums from the "other" population have belly girths that are, on average, 1.37cm less than possums from the Victoria population. For every increase of 1 cm in tail length, possums have an increase of 0.60 cm in belly girth. The intercept suggests that if all variables were at a value of zero (which would not be possible), then the belly girth would be 0.81 cm. The interaction coefficient suggests that the slope for the "other" population on belly girth is 0.048 lower for every 1 cm increase in tail length. Based on the adjusted R-squared value, the model predicts 10.85% of the variation in the response variable (belly girth). Several graphs above show that the assumptions for linear regression of linearity, normality, and homoskedasticity are all met. Independent observations/random sample is just based on how the data was gathered. When recomputing the regression results with robust standard errors no changes in values occurred in the estimate values from the regular regression stats. The standard error stats did change, with the robust standard error regression having slightly higher values for both explanatory variables and the interaction, but a lower standard error for the intercept standard error. When using the robust standard errors, the p-value was 0.0027, so the result is significant.
+
+#Bootstrapping
+```{r}
+samp_boot <- replicate(5000, {
+  boot_dat <- sample_frac(possum, replace = T)
+  boot_fit <- lm(belly_c~Pop*taill_c, data = boot_dat)
+  coef(boot_fit)
+})
+samp_boot %>% t %>% as.data.frame %>% summarize_all(sd)
+boot_fit2 <- lm(belly_c~Pop*taill_c,data = possum)
+resids2<-boot_fit2$residuals
+boot_fitted<-boot_fit2$fitted.values
+resid_resamp<-replicate(5000,{
+  new_resids<-sample(resids2,replace = TRUE)
+  possum$new_y<-boot_fitted+new_resids
+  new_fit<-lm(new_y~Pop*taill_c,data = possum)
+  coef(new_fit)
+})
+resid_resamp%>%t%>%as.data.frame%>%summarize_all(sd)
+resid_resamp%>%t%>%as.data.frame%>%pivot_longer(1:3)%>%group_by(name)%>% summarize(lower=quantile(value,.025), upper=quantile(value,.975))
+```
+
+#Bootstrap Comparison
+```{r}
+coeftest(lin_fit)[,1:2]#Normal SEs
+coeftest(lin_fit, vcov=vcovHC(lin_fit))[,1:2]#Robust SEs
+samp_boot%>%t%>%as.data.frame%>%summarize_all(sd)#Bootstrapped SEs
+resid_resamp%>%t%>%as.data.frame%>%summarize_all(sd)#Bootstrapped SEs (Residuals)
+
+```
+When bootstrapping, the "Other" population is no longer negatively correlated with belly girth, and instead suggests an increase an increase of around 0.6 cm. Tail length is still positively correlated with belly girth, but to a lesser degree. The non boostrapped data suggests that a 1cm increase in tail length indicates an increase of around 0.6 cm for belly girth. The bootstrapped data suggests that a 1 cm increase in tail length indicates an increase of aroun 0.22 cm in belly girth. Additionally, with the bootstrapped data, interaction between population "other" and tail length is now positively correlated. Instead of the slope of the "other" population on belly girth being 0.48 lower per 1 cm increase in tail length, the boostrapped data indicates that the slope actually goes up by about 0.3.
+
+#Logistic Regression
+```{r}
+library(lmtest)
+poss_fit <- glm(sex~footlgth + hdlngth,data = possum,family = binomial(link = "logit"))
+coeftest(poss_fit)
+log_probs<-predict(poss_fit,type = "response")
+table(predict=as.numeric(log_probs>.5),truth=possum$sex)%>%addmargins
+possum$logit<-predict(poss_fit,type="link")
+possum%>%ggplot()+geom_density(aes(logit,color=sex,fill=sex), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab("logit (log-odds)")+
+  geom_rug(aes(logit,color=sex))+
+  geom_text(x=-5,y=.07,label="TN = 431")+
+  geom_text(x=-1.75,y=.008,label="FN = 19")+
+  geom_text(x=1,y=.006,label="FP = 13")+
+  geom_text(x=5,y=.04,label="TP = 220")
+sensitivity<-49/59
+specificty<-16/42
+library(plotROC)
+ROCplot<-ggplot(possum)+geom_roc(aes(d=sex,m=log_probs), n.cuts = 0)
+ROCplot
+calc_auc(ROCplot)
+```
+
+The coefficients in this logistic regression suggests that a 1 mm increase in foot length indicates a decrease of 0.11 in the sex statistic. This essentially means the possum is more likely to be female. A 1 mm increase in head length indicates an increase of 0.13 in the sex statistic which means the possum is more likely to be male. The intercept value is -4.455, which means if foot length and head length were zero, the sex statistic would be -4.455, but this is not possible. From the confusion matrix, various values can be determined. The accuracy is 16+49/101 = 0.64, the sensitivity is 49/59 = 0.83, the specificity is 16/42 = 0.38, the precision is 49/75 = 0.65, and the auc is 0.64. The accuracy value indicates the proportion of the possums that were correctly predicted as either male or female, meaning 64% of the time, this model could determine sex based on foot length and head length. The sensitivity indicates the proportion of the positivie cases (in this instance males) that the model correctly guessed. The specificity indicates the proportion of the females that were correctly guessed. The low value of 0.38 that means the model only correctly identified the females 38% of the time, so possums were overidentified as male. The specificity refers to the proportion of possums identified as male that actually were male. An AUC of 0.64 is fairly low and falls into the "poor" category. This essentially means the model was not particularly effective at estimating sex based on foot length and head length.
+
+#Logistic Regression 2
+```{r}
+poss_fit2 <- glm(sex~(.),data = possum,family = binomial(link = "logit"))
+coeftest(poss_fit2)
+log_probs2<-predict(poss_fit2,type = "response")
+table(predict=as.numeric(log_probs2>.5),truth=possum$sex)%>%addmargins
+
+set.seed(1234)
+k=10
+cv_data<-possum[sample(nrow(possum)),]
+poss_folds<-cut(seq(1:nrow(possum)),breaks=k,labels = F)
+diags<-NULL
+for (i in 1:k) {
+  poss_train<-possum[poss_folds!=1,]
+  poss_test<-possum[poss_folds==1,]
+  poss_truth<-poss_test$sex
+  cv_fit<-glm(sex~(.),data = poss_train,family = "binomial")
+  poss_probs<-predict(cv_fit,newdata=poss_test,type="response")
+  diags<-rbind(diags,class_diag(poss_probs,poss_truth))
+}
+summarize_all(diags,mean)
+```
+
+Based on the confusion matrix, an accuracy value of 0.74, sensitivity value of 0.81, specificity value of 0.64, and precision value of 0.76 can be determined. Compared to the last model, this model has greatly increased its accuracy, precision, and specificity at the cost of a very slight decrease in sensitivity, from 0.83 to 0.81. Based on the 10-fold CV, the accuracy is 0.36, the sensitivity is 0.5, the specificity is 0.33, the precision is 0.14, and the AUC is 0.5. An AUC of 0.5 is very low, at the bottom of the worst bracket of categorizing them. This makes sense given that accuracy, precision, sensitivity, and specificity have all dropped significantly. This is not a good model.
+
+#Lasso
+```{r}
+library(glmnet)
+y<-as.matrix(possum$sex)
+x<-model.matrix(sex~(.),data = possum)[,-1]
+x<-scale(x)
+head(x)
+cv<-cv.glmnet(x,y,family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda = cv$lambda.1se)
+coef(lasso)
+set.seed(1234)
+k=10
+cv_data2<-possum[sample(nrow(possum)),]
+poss_folds2<-cut(seq(1:nrow(possum)),breaks=k,labels = F)
+diags2<-NULL
+for (i in 1:k) {
+  poss_train2<-possum[poss_folds2!=1,]
+  poss_test2<-possum[poss_folds2==1,]
+  poss_truth2<-poss_test2$sex
+  cv_fit2<-glm(sex~site,data = poss_train2,family = "binomial")
+  poss_probs2<-predict(cv_fit2,newdata=poss_test2,type="response")
+  diags2<-rbind(diags,class_diag(poss_probs2,poss_truth2))
+}
+summarize_all(diags2,mean)
+```
+
+When performing LASSO on the model, the only variable that is retained is site. All other variables are determined to not be effective enough at predicting sex. The AUC made with the model that LASSO was used on is 0.5. Again, very very bad. It is the same as with the 10-fold CV model above and lower than the first logistic model AUC of 0.64.
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
