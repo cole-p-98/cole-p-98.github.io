@@ -1,0 +1,15 @@
+---
+title: Blog post 2
+author: ''
+date: '2021-05-11'
+slug: blog-post-2
+categories: []
+tags: []
+description: ''
+---
+This is my second attempt at a blog post.
+
+```{R}
+summary(iris)
+
+```

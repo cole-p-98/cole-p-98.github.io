@@ -1,0 +1,38 @@
+---
+title: Blog Post 3
+author: ''
+date: '2021-05-11'
+slug: blog-post-3
+categories: []
+tags: []
+description: ''
+---
+I'm gonna be doing some python stuff here.
+```{python}
+z=list(range(0,101,5))
+z[4]
+max(z)
+min(z)
+len(z)
+z[10:]
+y=list(range(50,120,4))
+y+z
+z[10]*y[3]
+```
+
+```{R}
+library(reticulate)
+yes<-"no"
+
+```
+
+```{python}
+yes="absolutely"
+print(r.yes,yes)
+
+```
+
+```{R}
+cat(c(py$yes,yes))
+
+```

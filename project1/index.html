@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Cole Pringle" />
     
-    <link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
     <title>Population Statistics for Countries from 1990-2017</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
     
@@ -28,7 +28,7 @@
       <nav class="navbar navbar-default">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="../"><i class="fa fa-home"></i></a>
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -39,11 +39,11 @@
       <ul class="nav navbar-nav navbar-right">
       
         
-        <li><a href="../post/">BLOG</a></li>
+        <li><a href="/post/">BLOG</a></li>
         
-        <li><a href="../projects/">PROJECTS</a></li>
+        <li><a href="/projects/">PROJECTS</a></li>
         
-        <li><a href="../resume/">RESUME</a></li>
+        <li><a href="/resume/">RESUME</a></li>
         
       
       </ul>
@@ -54,7 +54,7 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="../project1/">Population Statistics for Countries from 1990-2017</a></strong>
+            <strong><a href="/project1/">Population Statistics for Countries from 1990-2017</a></strong>
           </h3>
         </div>
  
@@ -70,14 +70,14 @@
           <div class="panel-body">
             <div class="blogpost">
               
-<script src="../rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
-<script src="../rmarkdown-libs/plotly-binding/plotly.js"></script>
-<script src="../rmarkdown-libs/typedarray/typedarray.min.js"></script>
-<script src="../rmarkdown-libs/jquery/jquery.min.js"></script>
-<link href="../rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
-<script src="../rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
-<link href="../rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
-<script src="../rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
 
 
 <pre class="r"><code>fert_dat &lt;- read.csv(&quot;/stor/home/cdp2653/children_per_woman_total_fertility.csv&quot;)
@@ -721,7 +721,7 @@ One important thing to note from the data was an outlier in the life_expectancy 
     name, fill = value)) + geom_tile() + geom_text(aes(label = round(value, 
     2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + coord_fixed() + scale_fill_gradient2(low = &quot;red&quot;, 
     mid = &quot;white&quot;, high = &quot;blue&quot;) + ggtitle(&quot;Correlation Heatmap for Several Population Statistics&quot;)</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>This correlation matrix displays how the various variables correlate with each other. The one notable outlying variable from this heatmap is fertility. It has a negative correlation with all other variables whereas all other variables are positively correlated with each other. This makes sense goven that high fertility is often a sign of lesser developed countries and as countries develop their fertility tends to decrease. Every variable other than fertility is associated with advancement or higher quality of living, such as life expectancy and GDP. The year is also positively correlated with all variables except fertility. This suggests that, on average, as time moves forward, countries have increases in CO2 emission, life expectancy, GDP per capita, and lifetime CO2 consumption.</p>
 <pre class="r"><code>all_first_10 &lt;- full_tidied %&gt;% slice(1:280)
 ggplot(all_first_10, aes(life_expectancy, GDP_Per_Capita)) + 
@@ -729,19 +729,19 @@ ggplot(all_first_10, aes(life_expectancy, GDP_Per_Capita)) +
         fun = mean) + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) + 
     ggtitle(&quot;Correlation Between GDP, Life Expectancy, and CO2 Emissions&quot;) + 
     ylab(&quot;GDP Per Capita (USD)&quot;) + xlab(&quot;Life Expectancy (Years)&quot;)</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>This plot displays statistics for 10 of the countries in the dataset. Life expectancy is displayed along the x-axis, GDP along the Y, CO2 emission is represented by the size of the dots, and the countries or noted by the color of the dots. This plot echoes what was seen in the correlation heatmap and shows that life expectancy, GDP per capita, and CO2 emissions are all positively correlated. The countries with the highest life expectancy and GDP per capita, shown in the top right corner, are Australia, Austria, and Canada. They also have larger than average CO2 emission values. The country most notably located low on life expectancy and GDP per capita is Bangladesh, and it also has noticeably low CO2 emission values.</p>
 <pre class="r"><code>all_first_20 &lt;- full_tidied %&gt;% slice(1:557)
 ggplot(all_first_20, aes(year, GDP_Per_Capita)) + geom_point(aes(color = country)) + 
     ggtitle(&quot;GDP Per Capita Across 20 Countries From 1990-2017&quot;) + 
     ylab(&quot;GDP Per Capita (USD)&quot;) + xlab(&quot;Year&quot;)</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>This plot fluctuation in GDP per capita in 20 countries from 1990-2017. Interestingly, countries seem mostly clustered towards either the bottom or the top of the graph, with only a few countries occupying the middle space. Additionally, the countries near the top of the plot, those whose GDP per capita values are already high, seem to be increasing in GDP per capita while most other countries seem to be remaining somewhat stagnant. This seems to suggest that countries which are already well off tend to be the ones improving in GDP per capita whereas less developed countries have been continuing to struggle to improve.</p>
 <pre class="r"><code>ggplot(all_first_20, aes(x = country)) + geom_bar(aes(y = life_expectancy, 
     fill = country), stat = &quot;summary&quot;, fun = mean) + theme(axis.text.x = element_text(angle = 45, 
     hjust = 1), legend.position = &quot;none&quot;) + ggtitle(&quot;Average Life Expectancy Across 20 Countries&quot;) + 
     ylab(&quot;Life Expectancy (Years)&quot;) + xlab(&quot;Country&quot;)</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>This plot shows average life expectancy from 1990-2017 for 20 countries. 4 countries stand somewhat noticeably above the others, these being Australia, Austria, Belgium, and Canada. All of these countries are sitting at or just below 80 years as an average life expectancy. The 4 countries with the lowest average life expectancy are Benin, Botswana, Burkina Faso, and Cambodia, and all sit below 60 years.</p>
 <pre class="r"><code>library(cluster)
 full_tidied &lt;- full_tidied[-c(2460), ]
@@ -755,7 +755,7 @@ for (i in 2:10) {
 }
 ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
     breaks = 1:10)</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>library(cluster)
 pam1 &lt;- cluster_data %&gt;% pam(k = 3)
 
@@ -763,7 +763,7 @@ pamclust &lt;- cluster_data %&gt;% mutate(cluster = as.factor(pam1$clustering))
 pamclust %&gt;% ggplot(aes(life_expectancy, GDP_Per_Capita, CO2_emission, 
     fertility, color = cluster)) + geom_point() + ggtitle(&quot;Cluster Analysis of Relationships Between GDP Per Capita and Life Expectancy&quot;) + 
     ylab(&quot;GDP Per Capita (USD)&quot;) + xlab(&quot;Life Expectancy (Years)&quot;)</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>pamclust %&gt;% group_by(cluster) %&gt;% summarize_if(is.numeric, mean, 
     na.rm = T)</code></pre>
 <pre><code>## # A tibble: 3 x 5
@@ -818,7 +818,7 @@ full_clust &lt;- full_tidied %&gt;% select(life_expectancy, GDP_Per_Capita,
     diss = T)
 full_tidied %&gt;% mutate(cluster = as.factor(full_clust$clustering)) %&gt;% 
     ggpairs(columns = 3:6, aes(color = cluster))</code></pre>
-<p><img src="../project1_files/figure-html/unnamed-chunk-10-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/project1_files/figure-html/unnamed-chunk-10-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The results from the cluster analysis further emphasize the negative relationship between fertility and all other variables. 2 clusters was determined to be preferable for examining the data through a silhouette width test. However, the data was also examined by looking at three clusters. In this first plot, the correlation between GDP per capita and life expectancy was examined with the context of using clusters determined using all variables. 3 cluster centers were identified at the data points of 1996 Morocco, 2013 Lithuania, and 2005 Belgium. This means that each of these data points are representative of the average data for a single cluster as a whole.
 A 3-Dimensional plot was used in order to help visualize correlations between more than 2 variables, in this case, GDP per capita, fertility, and life expectancy. This plot shows that the cluster with high levels of GDP also has high life expectancy and low fertility. The fertility is particularly low at the extremely high end of GDP per capita.The other 2 clusters are divided largely on the basis of fertility and life expectancy, as both clusters have comparable values for GDP per capita. One of these 2 clusters has low life expectancy, ranging from about 45-70 years, and high fertility, ranging from slightly above 2 all the way up to above 7. The second of these 2 clusters acts as an intermediate between the two other clusters, and has a life expectancy ranging from approximately 55 years up to just above 80 years. The fertility of this cluster ranges from just above 1 to just below 6. The final, multi-paneled plot again reinforces the negative correlation between fertility and the other variables.</p>
 </div>
@@ -869,10 +869,10 @@ A 3-Dimensional plot was used in order to help visualize correlations between mo
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="../js/docs.min.js"></script>
-<script src="../js/main.js"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
 
-<script src="../js/ie10-viewport-bug-workaround.js"></script>
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
 
 
     

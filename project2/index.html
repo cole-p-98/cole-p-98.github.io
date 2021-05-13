@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Cole Pringle" />
     
-    <link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
     <title>Possum Data Analysis</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
     
@@ -28,7 +28,7 @@
       <nav class="navbar navbar-default">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="../"><i class="fa fa-home"></i></a>
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -39,11 +39,11 @@
       <ul class="nav navbar-nav navbar-right">
       
         
-        <li><a href="../post/">BLOG</a></li>
+        <li><a href="/post/">BLOG</a></li>
         
-        <li><a href="../projects/">PROJECTS</a></li>
+        <li><a href="/projects/">PROJECTS</a></li>
         
-        <li><a href="../resume/">RESUME</a></li>
+        <li><a href="/resume/">RESUME</a></li>
         
       
       </ul>
@@ -54,7 +54,7 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="../project2/">Possum Data Analysis</a></strong>
+            <strong><a href="/project2/">Possum Data Analysis</a></strong>
           </h3>
         </div>
  
@@ -176,7 +176,7 @@ head(pop_length)</code></pre>
 ## 5 vic     85.5
 ## 6 vic     90.5</code></pre>
 <pre class="r"><code>ggplot(pop_length,aes(totlngth,fill=Pop)) + geom_histogram(bins = 8) + facet_wrap(~Pop, ncol = 2) + theme(legend.position = &quot;none&quot;)</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>mean(vic_tot)#larger</code></pre>
 <pre><code>## [1] 87.9186</code></pre>
 <pre class="r"><code>mean(other_tot)</code></pre>
@@ -215,7 +215,7 @@ head(rand_samp)</code></pre>
 <pre><code>## [1] 0.8552927 -0.4689655 -0.7443464 1.1590217 0.8269447
 -0.1571371</code></pre>
 <pre class="r"><code>hist(rand_samp,main=&quot;&quot;,ylab=&quot;&quot;); abline(v=c(-1.131,1.131),col=&quot;red&quot;)</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-3-2.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-3-2.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>mean(rand_samp&gt;1.131 | rand_samp &lt; -1.131)</code></pre>
 <pre><code>## [1] 0.1746</code></pre>
 <p>The null hypothesis for this test would be:
@@ -288,17 +288,17 @@ coef(lin_fit)</code></pre>
 ## Multiple R-squared: 0.1353, Adjusted R-squared: 0.1085
 ## F-statistic: 5.059 on 3 and 97 DF, p-value: 0.00268</code></pre>
 <pre class="r"><code>possum%&gt;%ggplot(aes(taill_c,belly_c))+geom_point()+geom_smooth(method = &#39;lm&#39;,se=F)#Says if both explanatory are numeric then refer to slides. Does this mean if one is binary categorical it&#39;s not included in this plot, because I don&#39;t see how it would be unless making two plots.</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-1.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>possum%&gt;%ggplot(aes(x=taill_c, y=belly_c,group=Pop)) + geom_point(aes(color=Pop)) + 
   geom_smooth(method = &quot;lm&quot;,fullrange=T,aes(color=Pop)) + 
   theme(legend.position = c(.9,.19))+xlab(&quot;&quot;)</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-4-2.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-2.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>resids&lt;-lin_fit$residuals
 fitvals&lt;-lin_fit$fitted.values
 ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color=&#39;red&#39;)</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-4-3.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-3.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggplot()+geom_histogram(aes(resids), bins=20)</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-4-4.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-4.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>summary(lin_fit)</code></pre>
 <pre><code>##
 ## Call:
@@ -411,13 +411,13 @@ possum%&gt;%ggplot()+geom_density(aes(logit,color=sex,fill=sex), alpha=.4)+
   geom_text(x=-1.75,y=.008,label=&quot;FN = 19&quot;)+
   geom_text(x=1,y=.006,label=&quot;FP = 13&quot;)+
   geom_text(x=5,y=.04,label=&quot;TP = 220&quot;)</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>sensitivity&lt;-49/59
 specificty&lt;-16/42
 library(plotROC)
 ROCplot&lt;-ggplot(possum)+geom_roc(aes(d=sex,m=log_probs), n.cuts = 0)
 ROCplot</code></pre>
-<p><img src="../project2_files/figure-html/unnamed-chunk-7-2.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="/project2_files/figure-html/unnamed-chunk-7-2.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>calc_auc(ROCplot)</code></pre>
 <pre><code>##   PANEL group       AUC
 ## 1     1    -1 0.6404358</code></pre>
@@ -591,10 +591,10 @@ summarize_all(diags2,mean)</code></pre>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="../js/docs.min.js"></script>
-<script src="../js/main.js"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
 
-<script src="../js/ie10-viewport-bug-workaround.js"></script>
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
 
 
     

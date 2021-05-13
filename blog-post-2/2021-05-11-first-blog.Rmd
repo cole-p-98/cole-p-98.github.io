@@ -1,0 +1,17 @@
+---
+title: First Blog
+author: ''
+date: '2021-05-11'
+slug: first-blog
+categories: []
+tags: []
+description: ''
+---
+I am writing stuff seeing if it will work.
+```{R}
+summary(possum)
+
+```
+
+
+
